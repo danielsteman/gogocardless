@@ -16,7 +16,7 @@ import (
 )
 
 type Credentials struct {
-	SecretID string `json:"secret_id"`
+	SecretID  string `json:"secret_id"`
 	SecretKey string `json:"secret_key"`
 }
 
@@ -25,11 +25,10 @@ type Token struct {
 	AccessExpires  int    `json:"access_expires"`
 	Refresh        string `json:"refresh"`
 	RefreshExpires int    `json:"refresh_expires"`
-    }
-
+}
 
 func NewHTTPClient(timeout time.Duration) *http.Client {
-    return &http.Client{Timeout: timeout}
+	return &http.Client{Timeout: timeout}
 }
 
 func GetCredentials() (Credentials, error) {
@@ -47,7 +46,7 @@ func GetCredentials() (Credentials, error) {
 	}
 
 	return Credentials{
-		SecretID: secretID,
+		SecretID:  secretID,
 		SecretKey: secretKey,
 	}, nil
 }
@@ -86,30 +85,26 @@ func GetToken(client *http.Client, credentials Credentials) (*Token, error) {
 }
 
 func BuildAuthorizedRequest(method, url, token string, body io.Reader, contentType string) (*http.Request, error) {
-
 	if method != "GET" && method != "POST" {
-	    return nil, fmt.Errorf("unsupported HTTP method: %s", method)
+		return nil, fmt.Errorf("unsupported HTTP method: %s", method)
 	}
 	if url == "" {
-	    return nil, errors.New("URL cannot be empty")
+		return nil, errors.New("URL cannot be empty")
 	}
-
 
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-	    return nil, fmt.Errorf("error creating request: %v", err)
+		return nil, fmt.Errorf("error creating request: %v", err)
 	}
-
 
 	req.Header.Set("accept", "application/json")
 	if contentType != "" {
-	    req.Header.Set("Content-Type", contentType)
+		req.Header.Set("Content-Type", contentType)
 	}
 	req.Header.Set("Authorization", token)
 
 	return req, nil
 }
-
 
 func GoCardLessManager() {
 	credentials, err := GetCredentials()
@@ -150,8 +145,6 @@ func GetBanksInCountry(client *http.Client, countryCode string) ([]Bank, error) 
 	fmt.Println("Token:", string(responseBody))
 	return []Bank{}, err
 }
-
-
 
 func main() {
 	GoCardLessManager()
