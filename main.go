@@ -52,18 +52,16 @@ func GetCredentials() (Credentials, error) {
 }
 
 func GetToken(client *http.Client, credentials Credentials) (*Token, error) {
-	URL := "https://bankaccountdata.gocardless.com/api/v2/token/new/"
+	url := "https://bankaccountdata.gocardless.com/api/v2/token/new/"
 	requestBodyBytes, err := json.Marshal(credentials)
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling request body: %v", err)
 	}
-	req, err := http.NewRequest("POST", URL, bytes.NewBuffer(requestBodyBytes))
+
+	req, err := BuildAuthorizedRequest("POST", url, "", bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
-
-	req.Header.Set("accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
