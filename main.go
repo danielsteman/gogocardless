@@ -84,7 +84,7 @@ func GetToken(client *http.Client, credentials Credentials) (*Token, error) {
 	return &token, nil
 }
 
-func BuildAuthorizedRequest(method, url, token string, body io.Reader, contentType string) (*http.Request, error) {
+func BuildAuthorizedRequest(method string, url string, token string, body io.Reader) (*http.Request, error) {
 	if method != "GET" && method != "POST" {
 		return nil, fmt.Errorf("unsupported HTTP method: %s", method)
 	}
@@ -98,9 +98,7 @@ func BuildAuthorizedRequest(method, url, token string, body io.Reader, contentTy
 	}
 
 	req.Header.Set("accept", "application/json")
-	if contentType != "" {
-		req.Header.Set("Content-Type", contentType)
-	}
+	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", token)
 
 	return req, nil
@@ -132,8 +130,10 @@ type Bank struct {
 }
 
 func GetBanksInCountry(client *http.Client, countryCode string) ([]Bank, error) {
-	URL := fmt.Sprintf("https://bankaccountdata.gocardless.com/api/v2/institutions/?country=%s", countryCode)
-	resp, err := client.Get(URL)
+	url := fmt.Sprintf("https://bankaccountdata.gocardless.com/api/v2/institutions/?country=%s", countryCode)
+
+
+	resp, err := client.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
