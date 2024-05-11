@@ -108,7 +108,6 @@ func GoCardLessManager() {
 		log.Fatal("Couldn't get credentials:", err)
 		return
 	}
-
 	client := &http.Client{}
 	token, err := GetToken(client, credentials)
 	if err != nil {
@@ -116,6 +115,17 @@ func GoCardLessManager() {
 		return
 	}
 	fmt.Println("Token:", string(token.Access))
+
+	banks, err := GetBanksInCountry(client, *token, "NL")
+	if err != nil {
+		log.Fatal("Couldn't get banks:", err)
+		return
+	}
+
+	for index, bank := range banks {
+		fmt.Println("Index:", index)
+		fmt.Println("Banks:", string(bank.Name))
+	}
 }
 
 type Bank struct {
@@ -127,23 +137,27 @@ type Bank struct {
 	Logo                 string   `json:"logo"`
 }
 
-func GetBanksInCountry(client *http.Client, countryCode string) ([]Bank, error) {
+func GetBanksInCountry(client *http.Client, token Token, countryCode string, ) ([]Bank, error) {
 	url := fmt.Sprintf("https://bankaccountdata.gocardless.com/api/v2/institutions/?country=%s", countryCode)
-
-
-	resp, err := client.Get(url)
+	req, err := BuildAuthorizedRequest("POST", url, token.Access, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error getting banks: %v", err)
 	}
 	defer resp.Body.Close()
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
-	fmt.Println("Token:", string(responseBody))
+	fmt.Println("Banks:", string(responseBody))
 	return []Bank{}, err
 }
 
 func main() {
 	GoCardLessManager()
+
 }
