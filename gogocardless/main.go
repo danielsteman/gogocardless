@@ -137,7 +137,13 @@ type Bank struct {
 	Logo                 string   `json:"logo"`
 }
 
-func GetBanksInCountry(client *http.Client, token Token, countryCode string, ) ([]Bank, error) {
+type Response struct {
+	ID         string `json:"summary"`
+	Detail     string `json:"detail"`
+	StatusCode int    `json:"status_code"`
+}
+
+func GetBanksInCountry(client *http.Client, token Token, countryCode string) ([]Bank, error) {
 	url := fmt.Sprintf("https://bankaccountdata.gocardless.com/api/v2/institutions/?country=%s", countryCode)
 	req, err := BuildAuthorizedRequest("POST", url, token.Access, nil)
 	if err != nil {
@@ -153,11 +159,20 @@ func GetBanksInCountry(client *http.Client, token Token, countryCode string, ) (
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
-	fmt.Println("Banks:", string(responseBody))
+
+	response := Response{}
+	err = json.Unmarshal([]byte(responseBody), &response)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	if response.StatusCode != 200 {
+		fmt.Println(string(response.Detail))
+	}
+
 	return []Bank{}, err
 }
 
 func main() {
 	GoCardLessManager()
-
 }
