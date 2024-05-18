@@ -163,10 +163,55 @@ func GetBanksInCountry(client *http.Client, token Token, countryCode string) ([]
 	var banks []Bank
 	err = json.Unmarshal([]byte(jsonData), &banks)
 	if err != nil {
-		fmt.Println("Error unmarshalling JSON:", err)
+		return nil, fmt.Errorf("error unmarshalling json: %v", err)
 	}
 
 	return banks, err
+}
+
+type Status struct {
+    Short       string `json:"short"`
+    Long        string `json:"long"`
+    Description string `json:"description"`
+}
+
+
+type Requisition struct {
+    ID           string   `json:"id"`
+    Redirect     string   `json:"redirect"`
+    Status       Status   `json:"status"`
+    Agreement    string   `json:"agreement"`
+    Accounts     []string `json:"accounts"`
+    Reference    string   `json:"reference"`
+    UserLanguage string   `json:"user_language"`
+    Link         string   `json:"link"`
+}
+
+func CreateRequisition(client *http.Client, token Token, redirect string, institutionId string) (Requisition, error) {
+	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions"
+	req, err := BuildAuthorizedRequest("GET", url, token.Access, nil)
+	if err != nil {
+		return Requisition{}, fmt.Errorf("error creating request: %v", err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return Requisition{}, fmt.Errorf("error getting requisition: %v", err)
+	}
+	defer resp.Body.Close()
+	jsonData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return Requisition{}, fmt.Errorf("error reading response body: %v", err)
+	}
+
+	var requisition Requisition
+
+	err = json.Unmarshal(jsonData, &requisition)
+    if err != nil {
+        return Requisition{}, fmt.Errorf("error unmarshalling response: %v", err)
+    }
+
+	return requisition, err
 }
 
 func main() {
