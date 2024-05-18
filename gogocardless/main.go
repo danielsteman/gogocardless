@@ -166,22 +166,7 @@ func GetBanksInCountry(client *http.Client, token Token, countryCode string) ([]
 		fmt.Println("Error unmarshalling JSON:", err)
 	}
 
-	for _, bank := range banks {
-        fmt.Printf("ID: %s\nName: %s\nBIC: %s\nTransaction Total Days: %s\nCountries: %v\nLogo: %s\n\n",
-            bank.ID, bank.Name, bank.BIC, bank.TransactionTotalDays, bank.Countries, bank.Logo)
-    }
-
-	// response := Response{}
-	// err = json.Unmarshal([]byte(responseBody), &response)
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
-
-	// if response.StatusCode != 200 {
-	// 	fmt.Println(string(response.Detail))
-	// }
-
-	return []Bank{}, err
+	return banks, err
 }
 
 func main() {
