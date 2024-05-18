@@ -170,21 +170,20 @@ func GetBanksInCountry(client *http.Client, token Token, countryCode string) ([]
 }
 
 type Status struct {
-    Short       string `json:"short"`
-    Long        string `json:"long"`
-    Description string `json:"description"`
+	Short       string `json:"short"`
+	Long        string `json:"long"`
+	Description string `json:"description"`
 }
 
-
 type Requisition struct {
-    ID           string   `json:"id"`
-    Redirect     string   `json:"redirect"`
-    Status       Status   `json:"status"`
-    Agreement    string   `json:"agreement"`
-    Accounts     []string `json:"accounts"`
-    Reference    string   `json:"reference"`
-    UserLanguage string   `json:"user_language"`
-    Link         string   `json:"link"`
+	ID           string   `json:"id"`
+	Redirect     string   `json:"redirect"`
+	Status       Status   `json:"status"`
+	Agreement    string   `json:"agreement"`
+	Accounts     []string `json:"accounts"`
+	Reference    string   `json:"reference"`
+	UserLanguage string   `json:"user_language"`
+	Link         string   `json:"link"`
 }
 
 func CreateRequisition(client *http.Client, token Token, redirect string, institutionId string) (Requisition, error) {
@@ -207,9 +206,9 @@ func CreateRequisition(client *http.Client, token Token, redirect string, instit
 	var requisition Requisition
 
 	err = json.Unmarshal(jsonData, &requisition)
-    if err != nil {
-        return Requisition{}, fmt.Errorf("error unmarshalling response: %v", err)
-    }
+	if err != nil {
+		return Requisition{}, fmt.Errorf("error unmarshalling response: %v", err)
+	}
 
 	return requisition, err
 }
