@@ -8,6 +8,7 @@
   // put a ruler on the editing screen at 120 characters
   "editor.rulers": [120],
   "[go]": {
+    "editor.tabSize": 8,
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "golang.go",
     "editor.codeActionsOnSave": [
