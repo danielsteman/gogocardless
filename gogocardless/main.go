@@ -97,7 +97,7 @@ func BuildAuthorizedRequest(method string, url string, token string, body io.Rea
 
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer " + token)
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	return req, nil
 }
@@ -132,7 +132,7 @@ type Bank struct {
 	ID                   string   `json:"id"`
 	Name                 string   `json:"name"`
 	BIC                  string   `json:"bic"`
-	TransactionTotalDays int      `json:"transaction_total_days"`
+	TransactionTotalDays string   `json:"transaction_total_days"`
 	Countries            []string `json:"countries"`
 	Logo                 string   `json:"logo"`
 }
@@ -150,27 +150,36 @@ func GetBanksInCountry(client *http.Client, token Token, countryCode string) ([]
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
 
-	println(req.Header)
-
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error getting banks: %v", err)
 	}
 	defer resp.Body.Close()
-	responseBody, err := io.ReadAll(resp.Body)
+	jsonData, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
 
-	response := Response{}
-	err = json.Unmarshal([]byte(responseBody), &response)
+	var banks []Bank
+	err = json.Unmarshal([]byte(jsonData), &banks)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("Error unmarshalling JSON:", err)
 	}
 
-	if response.StatusCode != 200 {
-		fmt.Println(string(response.Detail))
-	}
+	for _, bank := range banks {
+        fmt.Printf("ID: %s\nName: %s\nBIC: %s\nTransaction Total Days: %s\nCountries: %v\nLogo: %s\n\n",
+            bank.ID, bank.Name, bank.BIC, bank.TransactionTotalDays, bank.Countries, bank.Logo)
+    }
+
+	// response := Response{}
+	// err = json.Unmarshal([]byte(responseBody), &response)
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
+
+	// if response.StatusCode != 200 {
+	// 	fmt.Println(string(response.Detail))
+	// }
 
 	return []Bank{}, err
 }
