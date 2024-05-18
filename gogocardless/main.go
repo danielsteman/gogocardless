@@ -97,7 +97,7 @@ func BuildAuthorizedRequest(method string, url string, token string, body io.Rea
 
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", token)
+	req.Header.Set("Authorization", "Bearer " + token)
 
 	return req, nil
 }
@@ -145,10 +145,12 @@ type Response struct {
 
 func GetBanksInCountry(client *http.Client, token Token, countryCode string) ([]Bank, error) {
 	url := fmt.Sprintf("https://bankaccountdata.gocardless.com/api/v2/institutions/?country=%s", countryCode)
-	req, err := BuildAuthorizedRequest("POST", url, token.Access, nil)
+	req, err := BuildAuthorizedRequest("GET", url, token.Access, nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
+
+	println(req.Header)
 
 	resp, err := client.Do(req)
 	if err != nil {
