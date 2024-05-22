@@ -16,6 +16,7 @@ func LoadAppConfig() (AppConfig, error) {
 	path := "settings.yml"
 	viper.AddConfigPath(path)
 	var config AppConfig
+
 	if err := viper.Unmarshal(&config); err != nil {
 		return AppConfig{}, fmt.Errorf("failed to parse config: %w", err)
 	}
