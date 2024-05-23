@@ -8,8 +8,9 @@ import (
 )
 
 type AppConfig struct {
-	SecretID  string `mapstructure:"SECRET_ID"`
-	SecretKey string `mapstructure:"SECRET_KEY"`
+	SecretID         string `mapstructure:"SECRET_ID"`
+	SecretKey        string `mapstructure:"SECRET_KEY"`
+	LocalDatabaseURL string `mapstructure:"LOCAL_DATABASE_URL"`
 }
 
 func LoadAppConfig(path string) (AppConfig, error) {

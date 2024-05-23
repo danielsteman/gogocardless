@@ -6,10 +6,19 @@ import (
 	"github.com/danielsteman/gogocardless/config"
 )
 
-func TestAdd(t *testing.T) {
+func TestGetSecretID(t *testing.T) {
 	config, _ := config.LoadAppConfig(".env.test")
 	got := config.SecretID
 	want := "example-secret-id"
+	if got != want {
+		t.Errorf("got %q, wanted %q", got, want)
+	}
+}
+
+func TestGetLocalDBURL(t *testing.T) {
+	config, _ := config.LoadAppConfig(".env.test")
+	got := config.LocalDatabaseURL
+	want := "localhost:420"
 	if got != want {
 		t.Errorf("got %q, wanted %q", got, want)
 	}
