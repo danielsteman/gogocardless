@@ -1,16 +1,22 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"net/http"
 
-	"github.com/danielsteman/gogocardless/config"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
-	config, err := config.LoadAppConfig()
-	if err != nil {
-		log.Fatal("Couldn't get banks:", err)
-	}
-	fmt.Println("test:", string(config.SecretID))
+	r := chi.NewRouter()
+
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("."))
+	})
+	r.Mount("/banks", bankResource{}.Routes())
 }
