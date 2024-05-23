@@ -2,19 +2,25 @@ package config
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/spf13/viper"
 )
 
 type AppConfig struct {
-	DbURL        string `mapstructure:"DB_URL"`
-	DbDriver     string `mapstructure:"DB_DRIVER"`
-	ServeAddress string `mapstructure:"SERVE_ADDRESS"`
+	SecretID  string `mapstructure:"SECRET_ID"`
+	SecretKey string `mapstructure:"SECRET_KEY"`
 }
 
-func LoadAppConfig() (AppConfig, error) {
-	path := "settings.yml"
-	viper.AddConfigPath(path)
+func LoadAppConfig(path string) (AppConfig, error) {
+	viper.SetConfigName("app")
+	viper.SetConfigType("env")
+	viper.SetConfigFile(path)
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatal("Error reading env file", err)
+	}
+
 	var config AppConfig
 
 	if err := viper.Unmarshal(&config); err != nil {
