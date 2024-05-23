@@ -7,9 +7,9 @@ import (
 )
 
 func TestAdd(t *testing.T) {
-	config, _ := config.LoadAppConfig(".env.example")
+	config, _ := config.LoadAppConfig(".env.test")
 	got := config.SecretID
-	want := "example-id"
+	want := "example-secret-id"
 	if got != want {
 		t.Errorf("got %q, wanted %q", got, want)
 	}
