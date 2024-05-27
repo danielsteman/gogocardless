@@ -19,4 +19,6 @@ func main() {
 		w.Write([]byte("."))
 	})
 	r.Mount("/banks", bankResource{}.Routes())
+
+	http.ListenAndServe(":3333", r)
 }

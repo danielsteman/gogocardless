@@ -17,7 +17,7 @@ func TestGetSecretID(t *testing.T) {
 
 func TestGetLocalDBURL(t *testing.T) {
 	config, _ := config.LoadAppConfig(".env.test")
-	got := config.LocalDatabaseURL
+	got := config.DBURL
 	want := "localhost:420"
 	if got != want {
 		t.Errorf("got %q, wanted %q", got, want)

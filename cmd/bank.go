@@ -6,8 +6,6 @@ type bankResource struct{}
 
 func (rs bankResource) Routes() chi.Router {
 	r := chi.NewRouter()
-	// r.Use() // some middleware..
-
 	// r.Get("/", rs.List)    // GET /users - read a list of users
 	// r.Post("/", rs.Create) // POST /users - create a new user and persist it
 	// r.Put("/", rs.Delete)
