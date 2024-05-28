@@ -97,20 +97,17 @@ func GetOrRefreshToken() (*Token, error) {
 	}
 
 	if result.Error == nil {
-		// Check if the token is still valid
 		expiresAt := token.CreatedAt.Add(time.Duration(token.AccessExpires) * time.Second)
 		if time.Now().Before(expiresAt) {
 			return &token, nil
 		}
 	}
 
-	// Token is expired or not found, create a new token
 	newToken, err := createNewToken()
 	if err != nil {
 		return nil, fmt.Errorf("error creating new token: %w", err)
 	}
 
-	// Save the new token to the database
 	if _, err := dbCreateToken(newToken); err != nil {
 		return nil, fmt.Errorf("error saving new token: %w", err)
 	}
