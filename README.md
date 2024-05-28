@@ -10,7 +10,7 @@ Ripped [these](https://www.arhea.net/posts/2023-08-24-golang-vscode-configuratio
 
 Run a local Postgres instance:
 
-```
+```bash
 docker run -d \          
     --name gogocardless-postgres \
     -e POSTGRES_DB=gogocardless \
@@ -22,7 +22,9 @@ docker run -d \
 
 ## Tests
 
-```
+Fire up the test database:
+
+```bash
 docker run -d \          
     --name gogocardless-postgres-test \
     -e POSTGRES_DB=gogocardless-test \
@@ -30,4 +32,10 @@ docker run -d \
     -e POSTGRES_PASSWORD=admin \
     -p 5431:5432 \
     postgres:latest
+```
+
+Run tests:
+
+```bash
+go test ./...
 ```
