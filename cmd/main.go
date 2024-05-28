@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/danielsteman/gogocardless/config"
 	"github.com/danielsteman/gogocardless/db"
 	"github.com/danielsteman/gogocardless/gocardless"
 	"github.com/go-chi/chi/v5"
@@ -11,12 +12,11 @@ import (
 )
 
 func main() {
-	db, err := db.GetDB(
-		db.DBConfig{
-			DBName: "gogocardless",
-			Port:   5432,
-		},
-	)
+	config, err := config.LoadAppConfig("../.env")
+	if err != nil {
+		panic("failed to load config")
+	}
+	db, err := db.GetDB(config)
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}

@@ -5,17 +5,19 @@ import (
 	"os"
 	"testing"
 
+	"github.com/danielsteman/gogocardless/config"
 	"github.com/danielsteman/gogocardless/db"
 	"github.com/danielsteman/gogocardless/gocardless"
 )
 
 func TestMain(m *testing.M) {
-	db, err := db.GetDB(
-		db.DBConfig{
-			DBName: "gogocardless-test",
-			Port:   5431,
-		},
-	)
+	config, err := config.LoadAppConfig("../.env")
+	if err != nil {
+		panic("failed to load config")
+	}
+
+	db, err := db.GetDB(config)
+
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}

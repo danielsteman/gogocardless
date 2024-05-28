@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 
+	"github.com/danielsteman/gogocardless/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -12,7 +13,7 @@ type DBConfig struct {
 	Port   int16
 }
 
-func GetDB(config DBConfig) (*gorm.DB, error) {
+func GetDB(config config.AppConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=localhost user=admin password=admin dbname=%s port=%d sslmode=disable TimeZone=Europe/Amsterdam", config.DBName, config.Port)
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,

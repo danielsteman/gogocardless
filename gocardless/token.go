@@ -39,7 +39,11 @@ func (rd *TokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
 }
 
 func createNewToken() (*Token, error) {
-	config, _ := config.LoadAppConfig(".env")
+	config, err := config.LoadAppConfig(".env")
+	if err != nil {
+		return nil, fmt.Errorf("cannot load config: %v", err)
+	}
+
 	url := "https://bankaccountdata.gocardless.com/api/v2/token/new/"
 	credentials := Credentials{
 		SecretID:  config.SecretID,
@@ -85,14 +89,12 @@ func createNewToken() (*Token, error) {
 	return &token, nil
 }
 
-// GetOrRefreshToken retrieves an existing token or generates a new one if necessary
 func GetOrRefreshToken() (*Token, error) {
-	db, err := db.GetDB(
-		db.DBConfig{
-			DBName: "gogocardless",
-			Port:   5432,
-		},
-	)
+	config, err := config.LoadAppConfig(".env")
+	if err != nil {
+		return nil, fmt.Errorf("cannot load config: %v", err)
+	}
+	db, err := db.GetDB(config)
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to the database: %w", err)
 	}
@@ -126,12 +128,11 @@ func GetOrRefreshToken() (*Token, error) {
 }
 
 func dbCreateToken(token *Token) (string, error) {
-	db, err := db.GetDB(
-		db.DBConfig{
-			DBName: "gogocardless",
-			Port:   5432,
-		},
-	)
+	config, err := config.LoadAppConfig("../.env")
+	if err != nil {
+		return "Token creation failed", fmt.Errorf("cannot load config: %v", err)
+	}
+	db, err := db.GetDB(config)
 
 	if err != nil {
 		return "", fmt.Errorf("error connecting to the database: %w", err)
