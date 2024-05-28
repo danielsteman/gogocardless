@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -8,6 +9,16 @@ import (
 )
 
 func main() {
+	db, err := getDB()
+	if err != nil {
+		log.Fatalf("Error connecting to the database: %v", err)
+	}
+
+	err = db.AutoMigrate(&Token{})
+	if err != nil {
+		panic("failed to migrate database")
+	}
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)

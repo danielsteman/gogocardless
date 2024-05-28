@@ -72,7 +72,6 @@ type TokenResponse struct {
 }
 
 func (rd *TokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	// Pre-processing before a response is marshalled and sent across the wire
 	rd.Elapsed = 10
 	return nil
 }
@@ -125,5 +124,9 @@ func GetToken() (*Token, error) {
 }
 
 // func GetOrRefreshToken() (*Token, error) {
+
+// }
+
+// func dbCreateToken(token *Token) (string, error) {
 
 // }
