@@ -4,17 +4,19 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/danielsteman/gogocardless/db"
+	"github.com/danielsteman/gogocardless/gocardless"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
-	db, err := getDB()
+	db, err := db.GetDB()
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
 
-	err = db.AutoMigrate(&Token{})
+	err = db.AutoMigrate(&gocardless.Token{})
 	if err != nil {
 		panic("failed to migrate database")
 	}

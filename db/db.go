@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func getDB() (*gorm.DB, error) {
+func GetDB() (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  "host=localhost user=admin password=admin dbname=gogocardless port=5432 sslmode=disable TimeZone=Europe/Amsterdam",
 		PreferSimpleProtocol: true,
