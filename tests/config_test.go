@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetSecretID(t *testing.T) {
-	config, _ := config.LoadAppConfig(".env.test")
+	config, _ := config.LoadAppConfig("../.env.test")
 	got := config.SecretID
 	want := "example-secret-id"
 	if got != want {
@@ -16,7 +16,7 @@ func TestGetSecretID(t *testing.T) {
 }
 
 func TestGetLocalDBURL(t *testing.T) {
-	config, _ := config.LoadAppConfig(".env.test")
+	config, _ := config.LoadAppConfig("../.env.test")
 	got := config.DBURL
 	want := "localhost:420"
 	if got != want {
