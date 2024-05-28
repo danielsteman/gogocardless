@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/danielsteman/gogocardless/config"
 	"github.com/go-chi/chi/v5"
@@ -37,7 +38,7 @@ type ListBanksResponse struct {
 }
 
 func ListBanks(w http.ResponseWriter, r *http.Request) {
-	token, err := GetToken()
+	token, err := createNewToken()
 
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to get token: %v", err), http.StatusInternalServerError)
@@ -76,7 +77,7 @@ func (rd *TokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func GetToken() (*Token, error) {
+func createNewToken() (*Token, error) {
 	config, _ := config.LoadAppConfig(".env")
 	url := "https://bankaccountdata.gocardless.com/api/v2/token/new/"
 	credentials := Credentials{
@@ -123,10 +124,48 @@ func GetToken() (*Token, error) {
 	return &token, nil
 }
 
-// func GetOrRefreshToken() (*Token, error) {
+// GetOrRefreshToken retrieves an existing token or generates a new one if necessary
+func GetOrRefreshToken() (*Token, error) {
+	db, err := getDB()
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to the database: %w", err)
+	}
 
-// }
+	var token Token
+	result := db.Order("created_at desc").First(&token)
+	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		return nil, fmt.Errorf("error retrieving token: %w", result.Error)
+	}
 
-// func dbCreateToken(token *Token) (string, error) {
+	if result.Error == nil {
+		// Check if the token is still valid
+		expiresAt := token.CreatedAt.Add(time.Duration(token.AccessExpires) * time.Second)
+		if time.Now().Before(expiresAt) {
+			return &token, nil
+		}
+	}
 
-// }
+	// Token is expired or not found, create a new token
+	newToken, err := createNewToken()
+	if err != nil {
+		return nil, fmt.Errorf("error creating new token: %w", err)
+	}
+
+	// Save the new token to the database
+	if _, err := dbCreateToken(newToken); err != nil {
+		return nil, fmt.Errorf("error saving new token: %w", err)
+	}
+
+	return newToken, nil
+}
+
+func dbCreateToken(token *Token) (string, error) {
+	db, err := getDB()
+	if err != nil {
+		return "", fmt.Errorf("error connecting to the database: %w", err)
+	}
+	if err := db.Create(token).Error; err != nil {
+		return "", fmt.Errorf("error creating token: %w", err)
+	}
+	return "Token created successfully", nil
+}
