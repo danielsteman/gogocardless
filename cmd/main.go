@@ -16,8 +16,13 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("."))
+		w.Write([]byte("sup dawg!"))
 	})
+
+	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("pong"))
+	})
+
 	r.Mount("/banks", bankResource{}.Routes())
 
 	http.ListenAndServe(":3333", r)

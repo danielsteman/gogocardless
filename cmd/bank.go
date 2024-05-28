@@ -77,12 +77,6 @@ func (rd *TokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func NewTokenResponse(token *Token) *TokenResponse {
-	resp := &TokenResponse{Token: token}
-
-	return resp
-}
-
 func GetToken() (*Token, error) {
 	config, _ := config.LoadAppConfig(".env")
 	url := "https://bankaccountdata.gocardless.com/api/v2/token/new/"
