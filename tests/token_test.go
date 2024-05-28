@@ -33,8 +33,25 @@ func TestMain(m *testing.M) {
 
 func TestCreateToken(t *testing.T) {
 	token, err := gocardless.GetOrRefreshToken()
-	fmt.Println("Token:", string(token.Access))
 	if err != nil {
-		t.Errorf("error getting token")
+		t.Errorf("error getting token: %v", err)
+	}
+
+	fmt.Println("Token:", string(token.Access))
+}
+
+func TestGetOrRefreshToken(t *testing.T) {
+	firstToken, err := gocardless.GetOrRefreshToken()
+	if err != nil {
+		t.Errorf("error getting token first time: %v", err)
+	}
+
+	secondToken, err := gocardless.GetOrRefreshToken()
+	if err != nil {
+		t.Errorf("error getting token second time: %v", err)
+	}
+
+	if firstToken.Access != secondToken.Access {
+		t.Errorf("expected %q and %q to be the same", firstToken.Access, secondToken.Access)
 	}
 }

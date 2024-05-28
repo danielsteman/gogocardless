@@ -6,17 +6,9 @@ import (
 	"github.com/danielsteman/gogocardless/config"
 )
 
-func TestGetSecretID(t *testing.T) {
-	got := config.Config.SecretID
-	want := "example-secret-id"
-	if got != want {
-		t.Errorf("got %q, wanted %q", got, want)
-	}
-}
-
 func TestGetLocalDBURL(t *testing.T) {
 	got := config.Config.DBURL
-	want := "localhost:420"
+	want := "postgresql://admin:admin@localhost:5432/gogocardless-test"
 	if got != want {
 		t.Errorf("got %q, wanted %q", got, want)
 	}
