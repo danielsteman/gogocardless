@@ -87,7 +87,7 @@ func createNewToken() (*Token, error) {
 
 // GetOrRefreshToken retrieves an existing token or generates a new one if necessary
 func GetOrRefreshToken() (*Token, error) {
-	db, err := db.GetDB()
+	db, err := db.GetDB("gogocardless")
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to the database: %w", err)
 	}
@@ -121,7 +121,7 @@ func GetOrRefreshToken() (*Token, error) {
 }
 
 func dbCreateToken(token *Token) (string, error) {
-	db, err := db.GetDB()
+	db, err := db.GetDB("gogocardless")
 	if err != nil {
 		return "", fmt.Errorf("error connecting to the database: %w", err)
 	}

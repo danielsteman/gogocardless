@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	db, err := db.GetDB()
+	db, err := db.GetDB("gogocardless")
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
