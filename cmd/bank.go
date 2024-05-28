@@ -9,6 +9,8 @@ import (
 
 	"github.com/danielsteman/gogocardless/config"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
+	"gorm.io/gorm"
 )
 
 type bankResource struct{}
@@ -29,8 +31,33 @@ func (rs bankResource) Routes() chi.Router {
 	return r
 }
 
-func ListBanks(w http.ResponseWriter, r *http.Request) {
+type Bank struct {
+	ID                   string   `json:"id"`
+	Name                 string   `json:"name"`
+	BIC                  string   `json:"bic"`
+	TransactionTotalDays string   `json:"transaction_total_days"`
+	Countries            []string `json:"countries"`
+	Logo                 string   `json:"logo"`
+}
 
+type ListBanksResponse struct {
+	Banks   []*Bank
+	Elapsed int64 `json:"elapsed"`
+}
+
+func ListBanks(w http.ResponseWriter, r *http.Request) {
+	token, err := GetToken()
+
+	if err != nil {
+		render.Status(r, http.StatusInternalServerError)
+	}
+
+	tokenResponse := TokenResponse{
+		Token:   token,
+		Elapsed: 0,
+	}
+	render.Status(r, http.StatusCreated)
+	render.Render(w, r, &tokenResponse)
 }
 
 type Credentials struct {
@@ -39,10 +66,29 @@ type Credentials struct {
 }
 
 type Token struct {
+	gorm.Model
 	Access         string `json:"access"`
 	AccessExpires  int    `json:"access_expires"`
 	Refresh        string `json:"refresh"`
 	RefreshExpires int    `json:"refresh_expires"`
+}
+
+type TokenResponse struct {
+	*Token
+
+	Elapsed int64 `json:"elapsed"`
+}
+
+func (rd *TokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	// Pre-processing before a response is marshalled and sent across the wire
+	rd.Elapsed = 10
+	return nil
+}
+
+func NewTokenResponse(token *Token) *TokenResponse {
+	resp := &TokenResponse{Token: token}
+
+	return resp
 }
 
 func GetToken() (*Token, error) {
