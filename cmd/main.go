@@ -12,11 +12,8 @@ import (
 )
 
 func main() {
-	config, err := config.LoadAppConfig("../.env")
-	if err != nil {
-		panic("failed to load config")
-	}
-	db, err := db.GetDB(config)
+	config.LoadAppConfig("../.env")
+	db, err := db.GetDB()
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}

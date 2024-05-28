@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -11,12 +12,10 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	config, err := config.LoadAppConfig("../.env")
-	if err != nil {
-		panic("failed to load config")
-	}
+	config.ResetAppConfig()
+	config.LoadAppConfig("../.env.test")
 
-	db, err := db.GetDB(config)
+	db, err := db.GetDB()
 
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
@@ -33,7 +32,8 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateToken(t *testing.T) {
-	_, err := gocardless.GetOrRefreshToken()
+	token, err := gocardless.GetOrRefreshToken()
+	fmt.Println("Token:", string(token.Access))
 	if err != nil {
 		t.Errorf("error getting token")
 	}

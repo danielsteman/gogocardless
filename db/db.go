@@ -13,8 +13,8 @@ type DBConfig struct {
 	Port   int16
 }
 
-func GetDB(config config.AppConfig) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=localhost user=admin password=admin dbname=%s port=%d sslmode=disable TimeZone=Europe/Amsterdam", config.DBName, config.Port)
+func GetDB() (*gorm.DB, error) {
+	dsn := fmt.Sprintf("host=localhost user=admin password=admin dbname=%s port=%d sslmode=disable TimeZone=Europe/Amsterdam", config.Config.DBName, config.Config.Port)
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
 		PreferSimpleProtocol: true,

@@ -39,15 +39,10 @@ func (rd *TokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
 }
 
 func createNewToken() (*Token, error) {
-	config, err := config.LoadAppConfig(".env")
-	if err != nil {
-		return nil, fmt.Errorf("cannot load config: %v", err)
-	}
-
 	url := "https://bankaccountdata.gocardless.com/api/v2/token/new/"
 	credentials := Credentials{
-		SecretID:  config.SecretID,
-		SecretKey: config.SecretKey,
+		SecretID:  config.Config.SecretID,
+		SecretKey: config.Config.SecretKey,
 	}
 
 	credentailsData, err := json.Marshal(credentials)
@@ -90,11 +85,7 @@ func createNewToken() (*Token, error) {
 }
 
 func GetOrRefreshToken() (*Token, error) {
-	config, err := config.LoadAppConfig(".env")
-	if err != nil {
-		return nil, fmt.Errorf("cannot load config: %v", err)
-	}
-	db, err := db.GetDB(config)
+	db, err := db.GetDB()
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to the database: %w", err)
 	}
@@ -128,11 +119,7 @@ func GetOrRefreshToken() (*Token, error) {
 }
 
 func dbCreateToken(token *Token) (string, error) {
-	config, err := config.LoadAppConfig("../.env")
-	if err != nil {
-		return "Token creation failed", fmt.Errorf("cannot load config: %v", err)
-	}
-	db, err := db.GetDB(config)
+	db, err := db.GetDB()
 
 	if err != nil {
 		return "", fmt.Errorf("error connecting to the database: %w", err)
