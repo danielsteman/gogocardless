@@ -1,8 +1,14 @@
 package tests
 
-// func TestCreateToken(t *testing.T) {
-// 	db, err := getDB()
-// 	if err != nil {
-// 		t.Errorf("error connecting to the database: %w", err)
-// 	}
-// }
+import (
+	"testing"
+
+	"github.com/danielsteman/gogocardless/gocardless"
+)
+
+func TestCreateToken(t *testing.T) {
+	_, err := gocardless.GetOrRefreshToken()
+	if err != nil {
+		t.Errorf("error getting token")
+	}
+}
