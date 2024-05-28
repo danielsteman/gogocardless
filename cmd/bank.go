@@ -101,6 +101,9 @@ func GetToken() (*Token, error) {
 		return nil, fmt.Errorf("error creating request: %v", err)
 	}
 
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("Content-Type", "application/json")
+
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
@@ -109,7 +112,7 @@ func GetToken() (*Token, error) {
 	}
 
 	defer resp.Body.Close()
-	// println(resp.StatusCode)
+
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
