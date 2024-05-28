@@ -10,7 +10,12 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	db, err := db.GetDB("gogocardless-test")
+	db, err := db.GetDB(
+		db.DBConfig{
+			DBName: "gogocardless-test",
+			Port:   5431,
+		},
+	)
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}

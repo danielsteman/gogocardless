@@ -7,8 +7,13 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetDB(DBName string) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=localhost user=admin password=admin dbname=%s port=5432 sslmode=disable TimeZone=Europe/Amsterdam", DBName)
+type DBConfig struct {
+	DBName string
+	Port   int16
+}
+
+func GetDB(config DBConfig) (*gorm.DB, error) {
+	dsn := fmt.Sprintf("host=localhost user=admin password=admin dbname=%s port=%d sslmode=disable TimeZone=Europe/Amsterdam", config.DBName, config.Port)
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
 		PreferSimpleProtocol: true,

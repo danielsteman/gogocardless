@@ -11,7 +11,12 @@ import (
 )
 
 func main() {
-	db, err := db.GetDB("gogocardless")
+	db, err := db.GetDB(
+		db.DBConfig{
+			DBName: "gogocardless",
+			Port:   5432,
+		},
+	)
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
