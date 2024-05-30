@@ -8,7 +8,7 @@ import (
 
 func TestGetLocalDBURL(t *testing.T) {
 	got := config.Config.DBURL
-	want := "postgresql://admin:admin@localhost:5432/gogocardless-test"
+	want := "postgresql://admin:admin@localhost:5431/gogocardless-test"
 	if got != want {
 		t.Errorf("got %q, wanted %q", got, want)
 	}

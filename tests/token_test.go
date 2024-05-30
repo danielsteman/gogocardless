@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -32,12 +31,10 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateToken(t *testing.T) {
-	token, err := gocardless.GetOrRefreshToken()
+	_, err := gocardless.GetOrRefreshToken()
 	if err != nil {
 		t.Errorf("error getting token: %v", err)
 	}
-
-	fmt.Println("Token:", string(token.Access))
 }
 
 func TestGetOrRefreshToken(t *testing.T) {
