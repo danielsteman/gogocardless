@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 )
 
 type UserAgreementRequestPayload struct {
-	InstitionId        string   `json:"institution_id"`
+	InstitutionId      string   `json:"institution_id"`
 	MaxHistoricalDays  int      `json:"max_historical_days"`
 	AccessValidForDays int      `json:"access_valid_for_days"`
 	AccessScope        []string `json:"access_scope"`
@@ -59,7 +58,7 @@ func GetEndUserAgreement(institutionID string) (UserAgreement, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/agreements/enduser/"
 
 	payload := UserAgreementRequestPayload{
-		InstitionId:        institutionID,
+		InstitutionId:      institutionID,
 		MaxHistoricalDays:  180,
 		AccessValidForDays: 180,
 		AccessScope:        []string{"balances", "details", "transactions"},
@@ -67,17 +66,17 @@ func GetEndUserAgreement(institutionID string) (UserAgreement, error) {
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		log.Fatal("Error marshalling JSON:", err)
+		return UserAgreement{}, fmt.Errorf("error marshalling JSON: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
-		log.Fatal("Error creating request:", err)
+		return UserAgreement{}, fmt.Errorf("error creating request: %w", err)
 	}
 
 	token, err := GetOrRefreshToken()
 	if err != nil {
-		log.Fatal("failed to get token:", err)
+		return UserAgreement{}, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	req.Header.Set("accept", "application/json")
@@ -87,23 +86,24 @@ func GetEndUserAgreement(institutionID string) (UserAgreement, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("failed to get user agreement:", err)
+		return UserAgreement{}, fmt.Errorf("failed to get user agreement: %w", err)
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
 		body, _ := io.ReadAll(resp.Body)
 		return UserAgreement{}, fmt.Errorf("failed to get user agreement: status code %d, response: %s", resp.StatusCode, string(body))
 	}
 
-	defer resp.Body.Close()
 	jsonData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("failed to read response body:", err)
+		return UserAgreement{}, fmt.Errorf("failed to read response body: %w", err)
 	}
+
 	var userAgreement UserAgreement
-	err = json.Unmarshal([]byte(jsonData), &userAgreement)
+	err = json.Unmarshal(jsonData, &userAgreement)
 	if err != nil {
-		log.Fatal("failed to get user agreement:", err)
+		return UserAgreement{}, fmt.Errorf("failed to unmarshal user agreement: %w", err)
 	}
 
 	return userAgreement, nil
@@ -111,11 +111,13 @@ func GetEndUserAgreement(institutionID string) (UserAgreement, error) {
 
 func GetEndUserRequisitionLink(institutionID string) (RedirectInfo, error) {
 	userAgreement, err := GetEndUserAgreement(institutionID)
+	if err != nil {
+		return RedirectInfo{}, fmt.Errorf("failed to get user agreement: %w", err)
+	}
+
 	newReference := uuid.New().String()
 	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/"
-	if err != nil {
-		log.Fatal("failed to get user agreement:", err)
-	}
+
 	payload := RequisitionPayload{
 		Redirect:      config.Config.RedirectURL,
 		InstitutionID: userAgreement.InstitutionID,
@@ -123,19 +125,20 @@ func GetEndUserRequisitionLink(institutionID string) (RedirectInfo, error) {
 		Agreement:     userAgreement.ID,
 		UserLanguage:  "EN",
 	}
+
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		log.Fatal("Error marshalling JSON:", err)
+		return RedirectInfo{}, fmt.Errorf("error marshalling JSON: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
-		log.Fatal("Error creating request:", err)
+		return RedirectInfo{}, fmt.Errorf("error creating request: %w", err)
 	}
 
 	token, err := GetOrRefreshToken()
 	if err != nil {
-		log.Fatal("failed to get token:", err)
+		return RedirectInfo{}, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	req.Header.Set("accept", "application/json")
@@ -145,24 +148,24 @@ func GetEndUserRequisitionLink(institutionID string) (RedirectInfo, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("failed to get redirect info:", err)
+		return RedirectInfo{}, fmt.Errorf("failed to get redirect info: %w", err)
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
 		body, _ := io.ReadAll(resp.Body)
 		return RedirectInfo{}, fmt.Errorf("failed to get redirect info: status code %d, response: %s", resp.StatusCode, string(body))
 	}
 
-	defer resp.Body.Close()
 	jsonData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal("failed to read response body:", err)
+		return RedirectInfo{}, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	var redirectInfo RedirectInfo
-	err = json.Unmarshal([]byte(jsonData), &redirectInfo)
+	err = json.Unmarshal(jsonData, &redirectInfo)
 	if err != nil {
-		log.Fatal("failed to get redirect info:", err)
+		return RedirectInfo{}, fmt.Errorf("failed to unmarshal redirect info: %w", err)
 	}
 
 	return redirectInfo, nil
