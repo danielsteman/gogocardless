@@ -37,16 +37,10 @@ type RequisitionPayload struct {
 	UserLanguage  string `json:"user_language"`
 }
 
-type Status struct {
-	Short       string `json:"short"`
-	Long        string `json:"long"`
-	Description string `json:"description"`
-}
-
 type RedirectInfo struct {
 	ID           string   `json:"id"`
 	Redirect     string   `json:"redirect"`
-	Status       Status   `json:"status"`
+	Status       string   `json:"status"`
 	Agreement    string   `json:"agreement"`
 	Accounts     []string `json:"accounts"`
 	Reference    string   `json:"reference"`

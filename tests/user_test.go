@@ -17,3 +17,15 @@ func TestGetEndUserAgreement(t *testing.T) {
 		log.Fatalf("Did not get the expected institution: %v", err)
 	}
 }
+
+func TestGetEndUserRequisitionLink(t *testing.T) {
+	want := "CR"
+	institutionID := "RABOBANK_RABONL2U"
+	endUserAgreement, err := gocardless.GetEndUserRequisitionLink(institutionID)
+	if err != nil {
+		log.Fatalf("Error getting redirect info: %v", err)
+	}
+	if endUserAgreement.Status != want {
+		log.Fatalf("Did not get the expected language: %v", err)
+	}
+}
