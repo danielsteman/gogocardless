@@ -11,11 +11,12 @@ import (
 )
 
 type AppConfig struct {
-	SecretID  string `json:"secret_id"`
-	SecretKey string `json:"secret_key"`
-	DBURL     string `json:"db_url"`
-	DBName    string `json:"db_name"`
-	Port      int    `json:"port"`
+	SecretID    string `json:"secret_id"`
+	SecretKey   string `json:"secret_key"`
+	DBURL       string `json:"db_url"`
+	DBName      string `json:"db_name"`
+	Port        int    `json:"port"`
+	RedirectURL string `json:"redirect_url"`
 }
 
 var (
@@ -34,11 +35,12 @@ func LoadAppConfig(path string) {
 			log.Fatal(fmt.Sprintf("PORT should be a number"))
 		}
 		Config = AppConfig{
-			SecretID:  os.Getenv("SECRET_ID"),
-			SecretKey: os.Getenv("SECRET_KEY"),
-			DBURL:     os.Getenv("DB_URL"),
-			DBName:    os.Getenv("DB_NAME"),
-			Port:      port,
+			SecretID:    os.Getenv("SECRET_ID"),
+			SecretKey:   os.Getenv("SECRET_KEY"),
+			DBURL:       os.Getenv("DB_URL"),
+			DBName:      os.Getenv("DB_NAME"),
+			Port:        port,
+			RedirectURL: os.Getenv("REDIRECT_URL"),
 		}
 	})
 }
