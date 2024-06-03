@@ -39,6 +39,7 @@ func main() {
 	})
 
 	r.Mount("/banks", bankResource{}.Routes())
+	r.Mount("/user", userResource{}.Routes())
 
 	http.ListenAndServe(":3333", r)
 }
