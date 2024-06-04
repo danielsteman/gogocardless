@@ -26,6 +26,18 @@ func TestGetEndUserRequisitionLink(t *testing.T) {
 		log.Fatalf("Error getting redirect info: %v", err)
 	}
 	if endUserAgreement.Status != want {
-		log.Fatalf("Did not get the expected language: %v", err)
+		log.Fatalf("Did not get the expected status: %v", err)
+	}
+}
+
+func TestGetEndUserAccountInfo(t *testing.T) {
+	t.Skip("Skipping testing with potentially invalid agreementID")
+	agreementID := "1006584c-d7a8-4cc4-988c-32af67bf1d02"
+	accountInfo, err := gocardless.GetEndUserAccountInfo(agreementID)
+	if err != nil {
+		log.Fatalf("Error getting account info: %v", err)
+	}
+	if len(accountInfo.Accounts) == 0 {
+		log.Fatalf("Did not get the expected number of accounts: %v", err)
 	}
 }
