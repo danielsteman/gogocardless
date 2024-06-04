@@ -29,7 +29,7 @@ async function handleBankClick(id: string) {
 
 export default function BanksList({ banks }: { banks: Bank[] }) {
   return (
-    <div className='px-16 py-8'>
+    <div>
       <h1 className='text-2xl pb-8 font-bold'>Banks</h1>
       <div className='flex flex-col items-start'>
         {banks.map(bank => (

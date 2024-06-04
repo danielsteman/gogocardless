@@ -15,7 +15,8 @@ const Callback: React.FC = () => {
 
   return (
     <div>
-      <h1>Callback Page</h1>
+      <h1 className='text-2xl pb-8 font-bold'>Callback Page</h1>
+      <div>Agreement reference: {agreementRef}</div>
     </div>
   );
 };
