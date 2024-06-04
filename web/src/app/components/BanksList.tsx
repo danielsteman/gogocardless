@@ -21,7 +21,7 @@ async function handleBankClick(id: string) {
 
   if (response.ok) {
     const result = await response.json();
-    alert(result.link);
+    window.location.href = result.link;
   } else {
     alert('Failed to get redirect link');
   }
