@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	config.LoadAppConfig("../.env")
+	config.LoadAppConfig(".env")
 	db, err := db.GetDB()
 	if err != nil {
 		log.Fatalf("Error connecting to the database: %v", err)

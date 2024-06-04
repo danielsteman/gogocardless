@@ -20,6 +20,20 @@ docker run -d \
     postgres:latest
 ```
 
+Run service that fetches data from gocardless:
+
+```
+go run ./cmd
+```
+
+Run frontend:
+
+```
+cd web
+yarn install
+yarn dev
+```
+
 ## Tests
 
 Fire up the test database:
