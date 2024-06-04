@@ -21,9 +21,9 @@ async function handleBankClick(id: string) {
 
   if (response.ok) {
     const result = await response.json();
-    alert(result.message);
+    alert(result.link);
   } else {
-    alert('Failed to handle click');
+    alert('Failed to get redirect link');
   }
 }
 
