@@ -48,6 +48,14 @@ type RedirectInfo struct {
 	Link         string   `json:"link"`
 }
 
+type AccountsInfo struct {
+	ID         string   `json:"id"`
+	Status     string   `json:"status"`
+	Agreements string   `json:"agreements"`
+	Accounts   []string `json:"accounts"`
+	Reference  string   `json:"reference"`
+}
+
 func GetEndUserAgreement(institutionID string) (UserAgreement, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/agreements/enduser/"
 
@@ -163,4 +171,46 @@ func GetEndUserRequisitionLink(institutionID string) (RedirectInfo, error) {
 	}
 
 	return redirectInfo, nil
+}
+
+func GetEndUserAccount(agreementID string) (AccountsInfo, error) {
+	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return AccountsInfo{}, fmt.Errorf("error creating request: %w", err)
+	}
+
+	token, err := GetOrRefreshToken()
+	if err != nil {
+		return AccountsInfo{}, fmt.Errorf("failed to get token: %w", err)
+	}
+
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token.Access)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return AccountsInfo{}, fmt.Errorf("failed to get account info: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return AccountsInfo{}, fmt.Errorf("failed to get account info: status code %d, response: %s", resp.StatusCode, string(body))
+	}
+
+	jsonData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return AccountsInfo{}, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var accountsInfo AccountsInfo
+	err = json.Unmarshal(jsonData, &accountsInfo)
+	if err != nil {
+		return AccountsInfo{}, fmt.Errorf("failed to unmarshal account info: %w", err)
+	}
+
+	return accountsInfo, nil
 }
