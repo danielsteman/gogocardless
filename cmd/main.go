@@ -47,8 +47,8 @@ func main() {
 		w.Write([]byte("pong"))
 	})
 
-	r.Mount("/banks", bankResource{}.Routes())
-	r.Mount("/user", userResource{}.Routes())
+	r.Mount("/api/banks", bankResource{}.Routes())
+	r.Mount("/api/user", userResource{}.Routes())
 
 	http.ListenAndServe(":3333", r)
 }

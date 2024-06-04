@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import BanksList from './components/BanksList';
 
 interface Bank {
   id: string;
@@ -10,24 +11,11 @@ interface Bank {
 }
 
 async function fetchBanks(): Promise<Bank[]> {
-  const response = await fetch('http://localhost:3333/banks/list');
+  const response = await fetch('http://localhost:3333/api/banks/list');
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   return response.json();
-}
-
-function BanksList({ banks }: { banks: Bank[] }) {
-  return (
-    <div className='px-16 py-8'>
-      <h1 className='text-2xl pb-8 font-bold'>Banks</h1>
-      <div>
-        {banks.map(bank => (
-          <div key={bank.id}>{bank.name}</div>
-        ))}
-      </div>
-    </div>
-  );
 }
 
 export default async function Page() {
