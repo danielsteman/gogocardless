@@ -53,3 +53,8 @@ Run tests:
 ```bash
 go test ./...
 ```
+
+## Market research
+
+1. How many people are affected by the problem of not being able to pay their subscriptions?
+
