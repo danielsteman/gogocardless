@@ -1,9 +1,11 @@
 // app/auth/signin/page.tsx
 'use client';
 
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 
 const SignIn = () => {
+  // const { data: session } = useSession();
+  // console.log(session);
   return (
     <div className='flex flex-col items-center justify-center min-h-screen py-2'>
       <h1 className='text-3xl font-bold mb-8'>Sign in</h1>
