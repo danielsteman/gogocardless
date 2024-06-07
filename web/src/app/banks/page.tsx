@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth/next';
 import authOptions from '../auth';
+import ProtectedLayout from '../layouts/ProtectedLayout';
 
 interface Bank {
   id: string;
@@ -39,11 +40,11 @@ export default async function Page() {
   }
 
   return (
-    <>
-      <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProtectedLayout>
         <p>Welcome, {session?.user?.name}</p>
         <BanksList banks={banks} />
-      </Suspense>
-    </>
+      </ProtectedLayout>
+    </Suspense>
   );
 }

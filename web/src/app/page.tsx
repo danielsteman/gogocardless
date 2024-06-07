@@ -26,9 +26,5 @@ export default async function Page() {
     console.error('Error fetching banks:', error);
   }
 
-  return (
-    <ProtectedLayout>
-      <div>hoi</div>
-    </ProtectedLayout>
-  );
+  return <div>hoi</div>;
 }
