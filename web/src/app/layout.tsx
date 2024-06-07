@@ -19,7 +19,7 @@ export default function RootLayout({
     <SessionWrapper>
       <html lang='en'>
         <body className={inter.className}>
-          <div className='px-16 py-8'>{children}</div>
+          <div>{children}</div>
         </body>
       </html>
     </SessionWrapper>

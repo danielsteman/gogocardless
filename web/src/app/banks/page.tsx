@@ -1,5 +1,5 @@
-import { FaUserCircle } from 'react-icons/fa';
-import UserMenu from './components/UserMenu';
+import { Suspense } from 'react';
+import BanksList from '../components/BanksList';
 
 interface Bank {
   id: string;
@@ -28,10 +28,10 @@ export default async function Page() {
   }
 
   return (
-    <div className='flex'>
-      <div className='ml-auto'>
-        <UserMenu />
-      </div>
-    </div>
+    <>
+      <Suspense fallback={<div>Loading...</div>}>
+        <BanksList banks={banks} />
+      </Suspense>
+    </>
   );
 }
