@@ -1,5 +1,9 @@
 import { Suspense } from 'react';
 import BanksList from '../components/BanksList';
+import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth/next';
+import authOptions from '../auth';
 
 interface Bank {
   id: string;
@@ -19,6 +23,13 @@ async function fetchBanks(): Promise<Bank[]> {
 }
 
 export default async function Page() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect('/login');
+    return null;
+  }
+
   let banks: Bank[] = [];
 
   try {
@@ -30,6 +41,7 @@ export default async function Page() {
   return (
     <>
       <Suspense fallback={<div>Loading...</div>}>
+        <p>Welcome, {session?.user?.name}</p>
         <BanksList banks={banks} />
       </Suspense>
     </>

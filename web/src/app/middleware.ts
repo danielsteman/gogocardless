@@ -1,1 +1,29 @@
-export { default } from "next-auth/middleware";
+import { getToken } from 'next-auth/jwt';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+const secret = process.env.NEXTAUTH_SECRET;
+
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req, secret });
+
+  // Define the protected route
+  const protectedRoute = '/banks';
+
+  // Check if the current route is protected
+  if (req.nextUrl.pathname.startsWith(protectedRoute)) {
+    if (!token) {
+      // Redirect to login if user is not authenticated
+      const url = req.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+  }
+
+  return NextResponse.next();
+}
+
+// Configures the middleware to run on specific paths
+export const config = {
+  matcher: ['/banks/:path*'],
+};
