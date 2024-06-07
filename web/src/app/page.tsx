@@ -1,5 +1,4 @@
-import { FaUserCircle } from 'react-icons/fa';
-import UserMenu from './components/UserMenu';
+import ProtectedLayout from './layouts/ProtectedLayout';
 
 interface Bank {
   id: string;
@@ -28,10 +27,8 @@ export default async function Page() {
   }
 
   return (
-    <div className='flex'>
-      <div className='ml-auto'>
-        <UserMenu />
-      </div>
-    </div>
+    <ProtectedLayout>
+      <div>hoi</div>
+    </ProtectedLayout>
   );
 }
