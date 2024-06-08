@@ -20,7 +20,10 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Error connecting to the database: %v", err)
 	}
 
-	err = db.AutoMigrate(&gocardless.Token{})
+	err = db.AutoMigrate(
+		&gocardless.Token{},
+		&gocardless.Requisition{},
+	)
 	if err != nil {
 		panic("failed to migrate database")
 	}

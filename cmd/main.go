@@ -16,10 +16,13 @@ func main() {
 	config.LoadAppConfig(".env")
 	db, err := db.GetDB()
 	if err != nil {
-		log.Fatalf("Error connecting to the database: %v", err)
+		log.Fatalf("error connecting to the database: %v", err)
 	}
 
-	err = db.AutoMigrate(&gocardless.Token{})
+	err = db.AutoMigrate(
+		&gocardless.Token{},
+		&gocardless.Requisition{},
+	)
 	if err != nil {
 		panic("failed to migrate database")
 	}

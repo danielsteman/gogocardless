@@ -117,12 +117,13 @@ func GetOrRefreshToken() (*Token, error) {
 
 func dbCreateToken(token *Token) (string, error) {
 	db, err := db.GetDB()
-
 	if err != nil {
 		return "", fmt.Errorf("error connecting to the database: %w", err)
 	}
+
 	if err := db.Create(token).Error; err != nil {
 		return "", fmt.Errorf("error creating token: %w", err)
 	}
+
 	return "Token created successfully", nil
 }

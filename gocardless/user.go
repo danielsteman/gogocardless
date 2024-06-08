@@ -9,7 +9,10 @@ import (
 	"time"
 
 	"github.com/danielsteman/gogocardless/config"
+	"github.com/danielsteman/gogocardless/db"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type UserAgreementRequestPayload struct {
@@ -37,15 +40,16 @@ type RequisitionPayload struct {
 	UserLanguage  string `json:"user_language"`
 }
 
-type RedirectInfo struct {
-	ID           string   `json:"id"`
-	Redirect     string   `json:"redirect"`
-	Status       string   `json:"status"`
-	Agreement    string   `json:"agreement"`
-	Accounts     []string `json:"accounts"`
-	Reference    string   `json:"reference"`
-	UserLanguage string   `json:"user_language"`
-	Link         string   `json:"link"`
+type Requisition struct {
+	gorm.Model
+	ID           string         `gorm:"type:varchar(36);primaryKey" json:"id"`
+	Redirect     string         `gorm:"type:varchar(255)" json:"redirect"`
+	Status       string         `gorm:"type:varchar(50)" json:"status"`
+	Agreement    string         `gorm:"type:varchar(36)" json:"agreement"`
+	Accounts     pq.StringArray `gorm:"type:text[]" json:"accounts"`
+	Reference    string         `gorm:"type:varchar(100);unique" json:"reference"`
+	UserLanguage string         `gorm:"type:varchar(10)" json:"user_language"`
+	Link         string         `gorm:"type:varchar(255)" json:"link"`
 }
 
 type AccountInfo struct {
@@ -111,10 +115,10 @@ func GetEndUserAgreement(institutionID string) (UserAgreement, error) {
 	return userAgreement, nil
 }
 
-func GetEndUserRequisitionLink(institutionID string) (RedirectInfo, error) {
+func GetEndUserRequisitionLink(institutionID string) (Requisition, error) {
 	userAgreement, err := GetEndUserAgreement(institutionID)
 	if err != nil {
-		return RedirectInfo{}, fmt.Errorf("failed to get user agreement: %w", err)
+		return Requisition{}, fmt.Errorf("failed to get user agreement: %w", err)
 	}
 
 	newReference := uuid.New().String()
@@ -130,17 +134,17 @@ func GetEndUserRequisitionLink(institutionID string) (RedirectInfo, error) {
 
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		return RedirectInfo{}, fmt.Errorf("error marshalling JSON: %w", err)
+		return Requisition{}, fmt.Errorf("error marshalling JSON: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
 	if err != nil {
-		return RedirectInfo{}, fmt.Errorf("error creating request: %w", err)
+		return Requisition{}, fmt.Errorf("error creating request: %w", err)
 	}
 
 	token, err := GetOrRefreshToken()
 	if err != nil {
-		return RedirectInfo{}, fmt.Errorf("failed to get token: %w", err)
+		return Requisition{}, fmt.Errorf("failed to get token: %w", err)
 	}
 
 	req.Header.Set("accept", "application/json")
@@ -150,27 +154,44 @@ func GetEndUserRequisitionLink(institutionID string) (RedirectInfo, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return RedirectInfo{}, fmt.Errorf("failed to get redirect info: %w", err)
+		return Requisition{}, fmt.Errorf("failed to get redirect info: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusCreated {
 		body, _ := io.ReadAll(resp.Body)
-		return RedirectInfo{}, fmt.Errorf("failed to get redirect info: status code %d, response: %s", resp.StatusCode, string(body))
+		return Requisition{}, fmt.Errorf("failed to get redirect info: status code %d, response: %s", resp.StatusCode, string(body))
 	}
 
 	jsonData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return RedirectInfo{}, fmt.Errorf("failed to read response body: %w", err)
+		return Requisition{}, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var redirectInfo RedirectInfo
-	err = json.Unmarshal(jsonData, &redirectInfo)
+	var requisition Requisition
+	err = json.Unmarshal(jsonData, &requisition)
 	if err != nil {
-		return RedirectInfo{}, fmt.Errorf("failed to unmarshal redirect info: %w", err)
+		return Requisition{}, fmt.Errorf("failed to unmarshal redirect info: %w", err)
 	}
 
-	return redirectInfo, nil
+	if _, err := dbCreateRequisition(requisition); err != nil {
+		return Requisition{}, fmt.Errorf("error saving new requisition: %w", err)
+	}
+
+	return requisition, nil
+}
+
+func dbCreateRequisition(requisition Requisition) (string, error) {
+	db, err := db.GetDB()
+	if err != nil {
+		return "", fmt.Errorf("error connecting to the database: %w", err)
+	}
+
+	if err := db.Create(&requisition).Error; err != nil {
+		return "", fmt.Errorf("error creating requisition: %w", err)
+	}
+
+	return "Requisition created successfully", nil
 }
 
 func GetEndUserAccountInfo(agreementID string) (AccountInfo, error) {
