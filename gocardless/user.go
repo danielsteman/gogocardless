@@ -41,8 +41,7 @@ type RequisitionPayload struct {
 }
 
 type BaseRequisition struct {
-	gorm.Model
-	ID           string         `gorm:"type:varchar(36);primaryKey" json:"id"`
+	ID           string         `gorm:"type:uuid;primaryKey" json:"id"`
 	Redirect     string         `gorm:"type:varchar(255)" json:"redirect"`
 	Status       string         `gorm:"type:varchar(50)" json:"status"`
 	Agreement    string         `gorm:"type:varchar(36)" json:"agreement"`
@@ -57,8 +56,13 @@ type Requisition struct {
 }
 
 type DBRequisition struct {
+	gorm.Model
 	BaseRequisition
 	Email string `gorm:"type:varchar(255)" json:"email"`
+}
+
+func (DBRequisition) TableName() string {
+	return "requisitions"
 }
 
 type AccountInfo struct {
@@ -183,14 +187,19 @@ func GetEndUserRequisitionLink(institutionID string, email string) (Requisition,
 		return Requisition{}, fmt.Errorf("failed to unmarshal redirect info: %w", err)
 	}
 
-	if _, err := dbCreateRequisition(requisition); err != nil {
+	dbRequisition := DBRequisition{
+		BaseRequisition: requisition.BaseRequisition,
+		Email:           email,
+	}
+
+	if _, err := dbCreateRequisition(dbRequisition); err != nil {
 		return Requisition{}, fmt.Errorf("error saving new requisition: %w", err)
 	}
 
 	return requisition, nil
 }
 
-func dbCreateRequisition(requisition Requisition) (string, error) {
+func dbCreateRequisition(requisition DBRequisition) (string, error) {
 	db, err := db.GetDB()
 	if err != nil {
 		return "", fmt.Errorf("error connecting to the database: %w", err)

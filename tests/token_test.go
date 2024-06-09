@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 
 	err = db.AutoMigrate(
 		&gocardless.Token{},
-		&gocardless.Requisition{},
+		&gocardless.DBRequisition{},
 	)
 	if err != nil {
 		panic("failed to migrate database")
