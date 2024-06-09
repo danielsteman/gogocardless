@@ -115,7 +115,7 @@ func GetEndUserAgreement(institutionID string) (UserAgreement, error) {
 	return userAgreement, nil
 }
 
-func GetEndUserRequisitionLink(institutionID string) (Requisition, error) {
+func GetEndUserRequisitionLink(institutionID string, email string) (Requisition, error) {
 	userAgreement, err := GetEndUserAgreement(institutionID)
 	if err != nil {
 		return Requisition{}, fmt.Errorf("failed to get user agreement: %w", err)

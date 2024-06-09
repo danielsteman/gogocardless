@@ -21,7 +21,7 @@ func TestGetEndUserAgreement(t *testing.T) {
 func TestGetEndUserRequisitionLink(t *testing.T) {
 	want := "CR"
 	institutionID := "RABOBANK_RABONL2U"
-	endUserAgreement, err := gocardless.GetEndUserRequisitionLink(institutionID)
+	endUserAgreement, err := gocardless.GetEndUserRequisitionLink(institutionID, "test@test.com")
 	if err != nil {
 		log.Fatalf("Error getting redirect info: %v", err)
 	}

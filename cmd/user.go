@@ -41,7 +41,7 @@ func userRedirectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redirectInfo, err := gocardless.GetEndUserRequisitionLink(redirectRequest.InstitutionID)
+	redirectInfo, err := gocardless.GetEndUserRequisitionLink(redirectRequest.InstitutionID, redirectRequest.UserEmail)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
