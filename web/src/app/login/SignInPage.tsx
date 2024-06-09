@@ -8,7 +8,6 @@ const SignInPage = async () => {
 
   if (session) {
     redirect('/banks');
-    return null;
   }
 
   return <SignIn />;
