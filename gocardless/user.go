@@ -40,7 +40,7 @@ type RequisitionPayload struct {
 	UserLanguage  string `json:"user_language"`
 }
 
-type BaseRequisition struct {
+type Requisition struct {
 	ID           string         `gorm:"type:uuid;primaryKey" json:"id"`
 	Redirect     string         `gorm:"type:varchar(255)" json:"redirect"`
 	Status       string         `gorm:"type:varchar(50)" json:"status"`
@@ -51,14 +51,17 @@ type BaseRequisition struct {
 	Link         string         `gorm:"type:varchar(255)" json:"link"`
 }
 
-type Requisition struct {
-	BaseRequisition
-}
-
 type DBRequisition struct {
 	gorm.Model
-	BaseRequisition
-	Email string `gorm:"type:varchar(255)" json:"email"`
+	ID           string         `gorm:"type:uuid;primaryKey" json:"id"`
+	Redirect     string         `gorm:"type:varchar(255)" json:"redirect"`
+	Status       string         `gorm:"type:varchar(50)" json:"status"`
+	Agreement    string         `gorm:"type:varchar(36)" json:"agreement"`
+	Accounts     pq.StringArray `gorm:"type:text[]" json:"accounts"`
+	Reference    string         `gorm:"type:varchar(100);unique" json:"reference"`
+	UserLanguage string         `gorm:"type:varchar(10)" json:"user_language"`
+	Link         string         `gorm:"type:varchar(255)" json:"link"`
+	Email        string         `gorm:"type:varchar(255)" json:"email"`
 }
 
 func (DBRequisition) TableName() string {
@@ -188,18 +191,25 @@ func GetEndUserRequisitionLink(institutionID string, email string) (Requisition,
 	}
 
 	dbRequisition := DBRequisition{
-		BaseRequisition: requisition.BaseRequisition,
-		Email:           email,
+		ID:           requisition.ID,
+		Redirect:     requisition.Redirect,
+		Status:       requisition.Status,
+		Agreement:    requisition.Agreement,
+		Accounts:     requisition.Accounts,
+		Reference:    requisition.Reference,
+		UserLanguage: requisition.UserLanguage,
+		Link:         requisition.Link,
+		Email:        email,
 	}
 
-	if _, err := dbCreateRequisition(dbRequisition); err != nil {
+	if _, err := DBCreateRequisition(dbRequisition); err != nil {
 		return Requisition{}, fmt.Errorf("error saving new requisition: %w", err)
 	}
 
 	return requisition, nil
 }
 
-func dbCreateRequisition(requisition DBRequisition) (string, error) {
+func DBCreateRequisition(requisition DBRequisition) (string, error) {
 	db, err := db.GetDB()
 	if err != nil {
 		return "", fmt.Errorf("error connecting to the database: %w", err)

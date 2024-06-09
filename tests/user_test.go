@@ -28,13 +28,13 @@ func TestGetEndUserRequisitionLink(t *testing.T) {
 	if endUserAgreement.Status != want {
 		log.Fatalf("Did not get the expected status: %v", err)
 	}
-	// requisition, err := gocardless.DBGetRequisition(endUserAgreement.ID)
-	// if err != nil {
-	// 	log.Fatalf("Error getting requisition from database: %v", err)
-	// }
-	// if requisition.ID != endUserAgreement.ID {
-	// 	log.Fatalf("Did not find created requisition in database: %v", err)
-	// }
+	requisition, err := gocardless.DBGetRequisition(endUserAgreement.ID)
+	if err != nil {
+		log.Fatalf("Error getting requisition from database: %v", err)
+	}
+	if requisition.ID != endUserAgreement.ID {
+		log.Fatalf("Did not find created requisition in database: %v", err)
+	}
 }
 
 func TestGetEndUserAccountInfo(t *testing.T) {
