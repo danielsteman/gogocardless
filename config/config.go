@@ -17,6 +17,7 @@ type AppConfig struct {
 	DBName      string `json:"db_name"`
 	Port        int    `json:"port"`
 	RedirectURL string `json:"redirect_url"`
+	JWTSecret   string `json:"jwt_secret"`
 }
 
 var (
@@ -41,6 +42,7 @@ func LoadAppConfig(path string) {
 			DBName:      os.Getenv("DB_NAME"),
 			Port:        port,
 			RedirectURL: os.Getenv("REDIRECT_URL"),
+			JWTSecret:   os.Getenv("JWT_SECRET"),
 		}
 	})
 }

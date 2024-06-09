@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
+	"github.com/danielsteman/gogocardless/config"
 	"github.com/danielsteman/gogocardless/gocardless"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -12,41 +16,66 @@ type userResource struct{}
 
 func (rs userResource) Routes() chi.Router {
 	r := chi.NewRouter()
-	r.Post("/redirect", userRedirectHandler)
-	r.Post("/accounts", userAccountsHandler)
+	r.Get("/redirect", userRedirectHandler)
+	r.Get("/accounts", userAccountsHandler)
 
 	return r
 }
 
-type RedirectRequest struct {
-	InstitutionID string `json:"institutionId"`
-	UserEmail     string `json:"userEmail"`
+var jwtSecret = []byte(config.Config.JWTSecret)
+
+type JWTClaims struct {
+	Email string `json:"email"`
+	jwt.StandardClaims
 }
 
-type AccountsRequest struct {
-	AgreementRef string `json:"agreementRef"`
-	UserEmail    string `json:"userEmail"`
+func VerifyToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenString == authHeader {
+			http.Error(w, "Invalid token format", http.StatusUnauthorized)
+			return
+		}
+
+		claims := &JWTClaims{}
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "user", claims)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// GetUserFromContext retrieves the user information from the request context
+func GetUserFromContext(r *http.Request) *JWTClaims {
+	if claims, ok := r.Context().Value("user").(*JWTClaims); ok {
+		return claims
+	}
+	return nil
 }
 
 func userRedirectHandler(w http.ResponseWriter, r *http.Request) {
-	var redirectRequest RedirectRequest
-	err := json.NewDecoder(r.Body).Decode(&redirectRequest)
-	if err != nil {
-		http.Error(w, "error parsing redirect request body", http.StatusInternalServerError)
+	institutionID := r.URL.Query().Get("institutionId")
+	if institutionID == "" {
+		http.Error(w, "institutionId query parameter is required", http.StatusBadRequest)
 		return
 	}
 
-	if redirectRequest.InstitutionID == "" {
-		http.Error(w, "InstitutionId is required in request body", http.StatusBadRequest)
-		return
-	}
+	user := GetUserFromContext(r)
 
-	if redirectRequest.UserEmail == "" {
-		http.Error(w, "UserEmail is required in request body", http.StatusBadRequest)
-		return
-	}
-
-	redirectInfo, err := gocardless.GetEndUserRequisitionLink(redirectRequest.InstitutionID, redirectRequest.UserEmail)
+	redirectInfo, err := gocardless.GetEndUserRequisitionLink(institutionID, user.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -61,14 +90,13 @@ func userRedirectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func userAccountsHandler(w http.ResponseWriter, r *http.Request) {
-	var accountsRequest AccountsRequest
-	err := json.NewDecoder(r.Body).Decode(&accountsRequest)
-	if err != nil {
-		http.Error(w, "error parsing accounts request body", http.StatusBadRequest)
+	agreementRef := r.URL.Query().Get("agreementRef")
+	if agreementRef == "" {
+		http.Error(w, "agreementRef query parameter is required", http.StatusBadRequest)
 		return
 	}
 
-	accountInfo, err := gocardless.GetEndUserAccountInfo(accountsRequest.AgreementRef, accountsRequest.UserEmail)
+	accountInfo, err := gocardless.GetEndUserAccountInfo(agreementRef)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -250,7 +250,7 @@ func DBGetRequisition(value string, searchBy string) (DBRequisition, error) {
 	return requisition, nil
 }
 
-func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error) {
+func GetEndUserAccountInfo(agreementID string) (AccountInfo, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
 
 	req, err := http.NewRequest("GET", url, nil)

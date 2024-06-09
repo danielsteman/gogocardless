@@ -2,6 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
+import jwt from 'jsonwebtoken';
 
 interface Bank {
   id: string;
@@ -13,17 +14,25 @@ interface Bank {
 }
 
 const handleBankClick = async (institutionId: string, userEmail: string) => {
+  const secret = process.env.NEXT_PUBLIC_JWT_SECRET!;
+
+  const payload = {
+    email: userEmail,
+  };
+
+  const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+
   try {
-    const response = await fetch('http://localhost:3333/api/user/redirect', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `http://localhost:3333/api/user/redirect?institutionId=${institutionId}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       },
-      body: JSON.stringify({
-        institutionId,
-        userEmail,
-      }),
-    });
+    );
 
     if (response.ok) {
       const requisition = await response.json();
