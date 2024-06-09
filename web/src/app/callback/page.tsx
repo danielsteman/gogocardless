@@ -1,11 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 
 const Callback: React.FC = () => {
-  const searchParams = useSearchParams();
-  const agreementRef = searchParams.get('ref');
+  const agreementRef = localStorage.getItem('agreementRef');
 
   useEffect(() => {
     if (agreementRef) {

@@ -26,8 +26,9 @@ const handleBankClick = async (institutionId: string, userEmail: string) => {
     });
 
     if (response.ok) {
-      const result = await response.json();
-      window.location.href = result.link;
+      const requisition = await response.json();
+      localStorage.setItem('agreementRef', requisition.id);
+      window.location.href = requisition.link;
     } else {
       alert('Failed to get redirect link');
     }
