@@ -18,7 +18,7 @@ interface Bank {
 async function fetchBanks(): Promise<Bank[]> {
   const response = await fetch('http://localhost:3333/api/banks/list');
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    throw new Error(`Error fetching banks: ${response.status}`);
   }
   return response.json();
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
 
 interface Bank {
   id: string;
@@ -47,7 +48,12 @@ export default function BanksList({ banks }: { banks: Bank[] }) {
     return <p>You need to be authenticated to view this content.</p>;
   }
 
-  const userEmail = session.user.email as string;
+  if (!session.user.email) {
+    console.warn('could not find email in session, redirecting to login page');
+    redirect('/login');
+  }
+
+  const userEmail = session.user.email;
 
   return (
     <div>
