@@ -40,7 +40,7 @@ type RequisitionPayload struct {
 	UserLanguage  string `json:"user_language"`
 }
 
-type Requisition struct {
+type BaseRequisition struct {
 	gorm.Model
 	ID           string         `gorm:"type:varchar(36);primaryKey" json:"id"`
 	Redirect     string         `gorm:"type:varchar(255)" json:"redirect"`
@@ -50,6 +50,15 @@ type Requisition struct {
 	Reference    string         `gorm:"type:varchar(100);unique" json:"reference"`
 	UserLanguage string         `gorm:"type:varchar(10)" json:"user_language"`
 	Link         string         `gorm:"type:varchar(255)" json:"link"`
+}
+
+type Requisition struct {
+	BaseRequisition
+}
+
+type DBRequisition struct {
+	BaseRequisition
+	Email string `gorm:"type:varchar(255)" json:"email"`
 }
 
 type AccountInfo struct {
