@@ -28,7 +28,7 @@ func TestGetEndUserRequisitionLink(t *testing.T) {
 	if endUserAgreement.Status != want {
 		log.Fatalf("Did not get the expected status: %v", err)
 	}
-	requisition, err := gocardless.DBGetRequisition(endUserAgreement.ID)
+	requisition, err := gocardless.DBGetRequisition(endUserAgreement.ID, "id")
 	if err != nil {
 		log.Fatalf("Error getting requisition from database: %v", err)
 	}
@@ -40,7 +40,8 @@ func TestGetEndUserRequisitionLink(t *testing.T) {
 func TestGetEndUserAccountInfo(t *testing.T) {
 	t.Skip("Skipping testing with potentially invalid agreementID")
 	agreementID := "1006584c-d7a8-4cc4-988c-32af67bf1d02"
-	accountInfo, err := gocardless.GetEndUserAccountInfo(agreementID)
+	email := "test@test.com"
+	accountInfo, err := gocardless.GetEndUserAccountInfo(agreementID, email)
 	if err != nil {
 		log.Fatalf("Error getting account info: %v", err)
 	}

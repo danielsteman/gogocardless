@@ -222,24 +222,35 @@ func DBCreateRequisition(requisition DBRequisition) (string, error) {
 	return "Requisition created successfully", nil
 }
 
-func DBGetRequisition(ID string) (Requisition, error) {
+func DBGetRequisition(value string, searchBy string) (DBRequisition, error) {
 	db, err := db.GetDB()
 	if err != nil {
-		return Requisition{}, fmt.Errorf("error connecting to the database: %w", err)
+		return DBRequisition{}, fmt.Errorf("error connecting to the database: %w", err)
 	}
 
-	var requisition Requisition
-	if err := db.First(&requisition, "id = ?", ID).Error; err != nil {
+	var requisition DBRequisition
+	var query string
+
+	switch searchBy {
+	case "id":
+		query = "id = ?"
+	case "email":
+		query = "email = ?"
+	default:
+		return DBRequisition{}, fmt.Errorf("invalid search parameter: %s", searchBy)
+	}
+
+	if err := db.First(&requisition, query, value).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return Requisition{}, fmt.Errorf("requisition not found: %w", err)
+			return DBRequisition{}, fmt.Errorf("requisition not found with %s: %w", searchBy, err)
 		}
-		return Requisition{}, fmt.Errorf("error retrieving requisition: %w", err)
+		return DBRequisition{}, fmt.Errorf("error retrieving requisition with %s: %w", searchBy, err)
 	}
 
 	return requisition, nil
 }
 
-func GetEndUserAccountInfo(agreementID string) (AccountInfo, error) {
+func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
 
 	req, err := http.NewRequest("GET", url, nil)

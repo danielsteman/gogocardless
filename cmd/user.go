@@ -13,7 +13,7 @@ type userResource struct{}
 func (rs userResource) Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Post("/redirect", userRedirectHandler)
-	r.Get("/accounts", userAccountsHandler)
+	r.Post("/accounts", userAccountsHandler)
 
 	return r
 }
@@ -21,6 +21,11 @@ func (rs userResource) Routes() chi.Router {
 type RedirectRequest struct {
 	InstitutionID string `json:"institutionId"`
 	UserEmail     string `json:"userEmail"`
+}
+
+type AccountsRequest struct {
+	AgreementRef string `json:"agreementRef"`
+	UserEmail    string `json:"userEmail"`
 }
 
 func userRedirectHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,13 +61,20 @@ func userRedirectHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func userAccountsHandler(w http.ResponseWriter, r *http.Request) {
+	var accountsRequest AccountsRequest
+	err := json.NewDecoder(r.Body).Decode(&accountsRequest)
+	if err != nil {
+		http.Error(w, "error parsing accounts request body", http.StatusInternalServerError)
+		return
+	}
+
 	agreementRef := r.URL.Query().Get("agreementRef")
 	if agreementRef == "" {
 		http.Error(w, "agreementRef query parameter is required", http.StatusBadRequest)
 		return
 	}
 
-	accountInfo, err := gocardless.GetEndUserAccountInfo(agreementRef)
+	accountInfo, err := gocardless.GetEndUserAccountInfo(accountsRequest.AgreementRef, accountsRequest.UserEmail)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
