@@ -1,22 +1,38 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-const Callback: React.FC = () => {
-  const agreementRef = localStorage.getItem('agreementRef');
+const Account = () => {
+  const [agreementRef, setAgreementRef] = useState<string | null>(null);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    if (agreementRef) {
-      console.log('agreementRef:', agreementRef);
+    const ref = localStorage.getItem('agreementRef');
+    setAgreementRef(ref);
+
+    if (ref) {
+      fetch(`http://localhost:3333/api/user/accounts?agreementRef=${ref}`)
+        .then(response => response.json())
+        .then(data => {
+          setData(data);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
     }
-  }, [agreementRef]);
+  }, []);
+
+  if (!agreementRef) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
       <h1 className='text-2xl pb-8 font-bold'>Callback Page</h1>
       <div>Agreement reference: {agreementRef}</div>
+      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
     </div>
   );
 };
 
-export default Callback;
+export default Account;
