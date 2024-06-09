@@ -12,20 +12,36 @@ type userResource struct{}
 
 func (rs userResource) Routes() chi.Router {
 	r := chi.NewRouter()
-	r.Get("/redirect", userRedirectHandler)
+	r.Post("/redirect", userRedirectHandler)
 	r.Get("/accounts", userAccountsHandler)
 
 	return r
 }
 
+type RedirectRequest struct {
+	InstitutionID string `json:"institutionId"`
+	UserEmail     string `json:"userEmail"`
+}
+
 func userRedirectHandler(w http.ResponseWriter, r *http.Request) {
-	institutionID := r.URL.Query().Get("institutionId")
-	if institutionID == "" {
-		http.Error(w, "institutionId query parameter is required", http.StatusBadRequest)
+	var redirectRequest RedirectRequest
+	err := json.NewDecoder(r.Body).Decode(&redirectRequest)
+	if err != nil {
+		http.Error(w, "error parsing redirect request body", http.StatusInternalServerError)
 		return
 	}
 
-	redirectInfo, err := gocardless.GetEndUserRequisitionLink(institutionID)
+	if redirectRequest.InstitutionID == "" {
+		http.Error(w, "InstitutionId is required in request body", http.StatusBadRequest)
+		return
+	}
+
+	if redirectRequest.UserEmail == "" {
+		http.Error(w, "UserEmail is required in request body", http.StatusBadRequest)
+		return
+	}
+
+	redirectInfo, err := gocardless.GetEndUserRequisitionLink(redirectRequest.InstitutionID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
