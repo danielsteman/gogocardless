@@ -194,6 +194,23 @@ func dbCreateRequisition(requisition Requisition) (string, error) {
 	return "Requisition created successfully", nil
 }
 
+func DBGetRequisition(ID string) (Requisition, error) {
+	db, err := db.GetDB()
+	if err != nil {
+		return Requisition{}, fmt.Errorf("error connecting to the database: %w", err)
+	}
+
+	var requisition Requisition
+	if err := db.First(&requisition, "id = ?", ID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return Requisition{}, fmt.Errorf("requisition not found: %w", err)
+		}
+		return Requisition{}, fmt.Errorf("error retrieving requisition: %w", err)
+	}
+
+	return requisition, nil
+}
+
 func GetEndUserAccountInfo(agreementID string) (AccountInfo, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
 
