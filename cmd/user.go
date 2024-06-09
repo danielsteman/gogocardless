@@ -64,13 +64,7 @@ func userAccountsHandler(w http.ResponseWriter, r *http.Request) {
 	var accountsRequest AccountsRequest
 	err := json.NewDecoder(r.Body).Decode(&accountsRequest)
 	if err != nil {
-		http.Error(w, "error parsing accounts request body", http.StatusInternalServerError)
-		return
-	}
-
-	agreementRef := r.URL.Query().Get("agreementRef")
-	if agreementRef == "" {
-		http.Error(w, "agreementRef query parameter is required", http.StatusBadRequest)
+		http.Error(w, "error parsing accounts request body", http.StatusBadRequest)
 		return
 	}
 
