@@ -1,8 +1,8 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
-import jwt from 'jsonwebtoken';
+import { useSession } from 'next-auth/react';
+import getRedirectLink from '../utils/getRedirectLink';
 
 interface Bank {
   id: string;
@@ -14,24 +14,9 @@ interface Bank {
 }
 
 const handleBankClick = async (institutionId: string, userEmail: string) => {
-  const secret = process.env.NEXT_PUBLIC_JWT_SECRET!;
-
-  const payload = {
-    email: userEmail,
-  };
-
-  const token = jwt.sign(payload, secret, { expiresIn: '1h' });
-
   try {
     const response = await fetch(
-      `http://localhost:3333/api/user/redirect?institutionId=${institutionId}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      },
+      `/api/redirect?institutionId=${institutionId}&userEmail=${userEmail}`,
     );
 
     if (response.ok) {

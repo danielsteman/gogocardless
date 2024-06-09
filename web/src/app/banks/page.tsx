@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import BanksList from '../components/BanksList';
+import BanksList from './BanksList';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth/next';
 import authOptions from '../auth';
