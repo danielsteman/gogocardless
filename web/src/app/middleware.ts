@@ -7,11 +7,13 @@ const secret = process.env.NEXTAUTH_SECRET;
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret });
 
-  // Define the protected route
-  const protectedRoute = '/banks';
+  // Define the protected routes
+  const protectedRoutes = ['/banks', '/account', '/settings'];
 
   // Check if the current route is protected
-  if (req.nextUrl.pathname.startsWith(protectedRoute)) {
+  const isProtectedRoute = protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route));
+
+  if (isProtectedRoute) {
     if (!token) {
       // Redirect to login if user is not authenticated
       const url = req.nextUrl.clone();
@@ -25,5 +27,5 @@ export async function middleware(req: NextRequest) {
 
 // Configures the middleware to run on specific paths
 export const config = {
-  matcher: ['/banks/:path*'],
+  matcher: ['/banks/:path*', '/account/:path*', '/settings/:path*'],
 };
