@@ -1,19 +1,29 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import getRedirectLink from '../../utils/getRedirectLink';
+import { NextResponse } from 'next/server';
+import { emailIsValid } from '@/app/utils/emailIsValid';
 
-export async function GET(req: NextApiRequest, res: NextApiResponse) {
-  const { institutionId, userEmail } = req.query;
+export async function POST(req: Request) {
+  const data = await req.json();
+  console.log(data)
+  const email = data.email
+  const institutionId = data.institutionId
 
-  if (!institutionId || !userEmail) {
-    return res.status(400).json({ error: 'Missing institutionId or userEmail' });
+  if (!institutionId || !email) {
+    return NextResponse.json({ error: 'Missing institutionId or userEmail' }, { status: 400 })
   }
 
+  if (!emailIsValid(email)) {
+    return NextResponse.json({ error: 'Email has invalid format' }, { status: 400 })
+  }
+
+  let response
+
   try {
-    const response = await getRedirectLink(institutionId as string, userEmail as string);
+    response = await getRedirectLink(institutionId as string, email as string);
     const data = await response.json();
-    return res.status(response.status).json(data);
+    return NextResponse.json(data, { status: response.status })
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ error: 'An error occurred while getting the redirect link' });
+    return response
   }
 }

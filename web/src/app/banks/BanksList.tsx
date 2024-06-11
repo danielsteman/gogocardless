@@ -2,7 +2,6 @@
 
 import { redirect } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import getRedirectLink from '../utils/getRedirectLink';
 
 interface Bank {
   id: string;
@@ -13,22 +12,28 @@ interface Bank {
   logo: string;
 }
 
-const handleBankClick = async (institutionId: string, userEmail: string) => {
+const handleBankClick = async (institutionId: string, email: string) => {
   try {
-    const response = await fetch(
-      `/api/redirect?institutionId=${institutionId}&userEmail=${userEmail}`,
-    );
+    const response = await fetch('/api/redirect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        institutionId: institutionId,
+        email: email,
+      }),
+    });
 
+    const data = await response.json();
     if (response.ok) {
-      const requisition = await response.json();
-      localStorage.setItem('agreementRef', requisition.id);
-      window.location.href = requisition.link;
+      localStorage.setItem('agreementRef', data.id);
+      window.location.href = data.link;
     } else {
-      alert('Failed to get redirect link');
+      console.error('Error:', data.error);
     }
   } catch (error) {
     console.error('Error:', error);
-    alert('An error occurred while processing your request.');
   }
 };
 
