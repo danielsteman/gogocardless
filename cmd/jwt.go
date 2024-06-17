@@ -6,14 +6,14 @@ import (
 	"strings"
 
 	"github.com/danielsteman/gogocardless/config"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var jwtSecret = []byte(config.Config.JWTSecret)
 
 type JWTClaims struct {
 	Email string `json:"email"`
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 func VerifyToken(next http.Handler) http.Handler {
@@ -32,8 +32,14 @@ func VerifyToken(next http.Handler) http.Handler {
 
 		claims := &JWTClaims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				http.Error(w, "Invalid Authorization header", http.StatusUnauthorized)
+			}
 			return jwtSecret, nil
 		})
+
+		println(token.Valid)
+		println(token.Claims)
 
 		if err != nil || !token.Valid {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)

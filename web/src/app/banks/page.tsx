@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth/next';
 import authOptions from '../auth';
 import ProtectedLayout from '../layouts/ProtectedLayout';
+import jwt from 'jsonwebtoken';
 
 interface Bank {
   id: string;
@@ -14,8 +15,14 @@ interface Bank {
   logo: string;
 }
 
-async function fetchBanks(): Promise<Bank[]> {
-  const response = await fetch('http://localhost:3333/api/banks/list');
+async function fetchBanks(email: string): Promise<Bank[]> {
+  const token = jwt.sign({ email }, process.env.NEXT_PUBLIC_NEXTAUTH_SECRET!);
+  const response = await fetch('http://localhost:3333/api/banks/list', {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
   if (!response.ok) {
     throw new Error(`Error fetching banks: ${response.status}`);
   }
@@ -32,7 +39,7 @@ export default async function Page() {
   let banks: Bank[] = [];
 
   try {
-    banks = await fetchBanks();
+    banks = await fetchBanks(session.user?.email!);
   } catch (error) {
     console.error('Error fetching banks:', error);
   }
