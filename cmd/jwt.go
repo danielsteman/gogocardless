@@ -38,8 +38,7 @@ func VerifyToken(next http.Handler) http.Handler {
 			return jwtSecret, nil
 		})
 
-		println(token.Valid)
-		println(token.Claims)
+		println(claims.Email)
 
 		if err != nil || !token.Valid {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)

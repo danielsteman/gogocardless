@@ -16,7 +16,9 @@ interface Bank {
 }
 
 async function fetchBanks(email: string): Promise<Bank[]> {
-  const token = jwt.sign({ email }, process.env.NEXT_PUBLIC_NEXTAUTH_SECRET!);
+  const token = jwt.sign({ email }, process.env.NEXT_PUBLIC_NEXTAUTH_SECRET!, {
+    expiresIn: '1h',
+  });
   const response = await fetch('http://localhost:3333/api/banks/list', {
     headers: {
       'Content-Type': 'application/json',
