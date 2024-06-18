@@ -1,4 +1,4 @@
-package main
+package auth
 
 import (
 	"context"
@@ -33,7 +33,7 @@ func VerifyToken(next http.Handler) http.Handler {
 		claims := &JWTClaims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				http.Error(w, "Invalid Authorization header", http.StatusUnauthorized)
+				http.Error(w, "Invalid signing method", http.StatusUnauthorized)
 			}
 			return jwtSecret, nil
 		})

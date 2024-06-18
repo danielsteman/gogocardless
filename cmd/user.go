@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/danielsteman/gogocardless/auth"
 	"github.com/danielsteman/gogocardless/gocardless"
 	"github.com/go-chi/chi/v5"
 )
@@ -25,7 +26,7 @@ func userRedirectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := GetUserFromContext(r)
+	user := auth.GetUserFromContext(r)
 
 	redirectInfo, err := gocardless.GetEndUserRequisitionLink(institutionID, user.Email)
 	if err != nil {
