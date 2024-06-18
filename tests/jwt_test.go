@@ -13,7 +13,6 @@ import (
 )
 
 func TestVerifyToken(t *testing.T) {
-	// Helper function to create a test JWT token
 	createTestToken := func(email string, secret []byte) string {
 		claims := &auth.JWTClaims{
 			Email: email,
