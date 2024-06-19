@@ -9,8 +9,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte(config.Config.JWTSecret)
-
 type JWTClaims struct {
 	Email string `json:"email"`
 	jwt.RegisteredClaims
@@ -30,15 +28,19 @@ func VerifyToken(next http.Handler) http.Handler {
 			return
 		}
 
+		println("Token String:", tokenString)
+
+		println("Secret:", config.Config.JWTSecret)
+
 		claims := &JWTClaims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				http.Error(w, "Invalid signing method", http.StatusUnauthorized)
 			}
-			return jwtSecret, nil
+			return []byte(config.Config.JWTSecret), nil
 		})
 
-		println(claims.Email)
+		println("Claims Email:", claims.Email)
 
 		if err != nil || !token.Valid {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)

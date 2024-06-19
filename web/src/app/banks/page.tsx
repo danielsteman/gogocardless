@@ -16,9 +16,10 @@ interface Bank {
 }
 
 async function fetchBanks(email: string): Promise<Bank[]> {
-  const token = jwt.sign({ email }, process.env.NEXT_PUBLIC_NEXTAUTH_SECRET!, {
+  const token = jwt.sign({ email: email }, process.env.NEXTAUTH_SECRET!, {
     expiresIn: '1h',
   });
+  console.log(`token: ${token}`);
   const response = await fetch('http://localhost:3333/api/banks/list', {
     headers: {
       'Content-Type': 'application/json',
@@ -26,7 +27,8 @@ async function fetchBanks(email: string): Promise<Bank[]> {
     },
   });
   if (!response.ok) {
-    throw new Error(`Error fetching banks: ${response.status}`);
+    const errorText = await response.text();
+    throw new Error(`Error fetching banks: ${response.status} - ${errorText}`);
   }
   return response.json();
 }
