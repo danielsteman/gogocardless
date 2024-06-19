@@ -28,10 +28,6 @@ func VerifyToken(next http.Handler) http.Handler {
 			return
 		}
 
-		println("Token String:", tokenString)
-
-		println("Secret:", config.Config.JWTSecret)
-
 		claims := &JWTClaims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -39,8 +35,6 @@ func VerifyToken(next http.Handler) http.Handler {
 			}
 			return []byte(config.Config.JWTSecret), nil
 		})
-
-		println("Claims Email:", claims.Email)
 
 		if err != nil || !token.Valid {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)

@@ -19,7 +19,6 @@ async function fetchBanks(email: string): Promise<Bank[]> {
   const token = jwt.sign({ email: email }, process.env.NEXTAUTH_SECRET!, {
     expiresIn: '1h',
   });
-  console.log(`token: ${token}`);
   const response = await fetch('http://localhost:3333/api/banks/list', {
     headers: {
       'Content-Type': 'application/json',
