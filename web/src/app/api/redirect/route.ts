@@ -1,12 +1,20 @@
 import getRedirectLink from '../../utils/getRedirectLink';
 import { NextResponse } from 'next/server';
 import { emailIsValid } from '@/app/utils/emailIsValid';
+import authOptions from '@/app/auth';
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
 
 export async function POST(req: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.redirect("/login")
+  }
+
   const data = await req.json();
-  console.log(data)
-  const email = data.email
   const institutionId = data.institutionId
+  const email = session?.user?.email
 
   if (!institutionId || !email) {
     return NextResponse.json({ error: 'Missing institutionId or userEmail' }, { status: 400 })
