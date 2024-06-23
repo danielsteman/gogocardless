@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
-import BanksList from './BanksList';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth/next';
 import authOptions from '../auth';
 import ProtectedLayout from '../layouts/ProtectedLayout';
 import jwt from 'jsonwebtoken';
+import { cookies } from 'next/headers';
 
 interface Bank {
   id: string;
@@ -47,11 +47,59 @@ export default async function Page() {
     console.error('Error fetching banks:', error);
   }
 
+  const handleBankClick = async (data: FormData) => {
+    'use server';
+
+    const institutionId = data.get('institutionId');
+
+    try {
+      const response = await fetch('/api/redirect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          institutionId: institutionId,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        cookies().set('agreementRef', data.id);
+        window.location.href = data.link;
+      } else {
+        console.error('Response error:', data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <ProtectedLayout>
         <p>Welcome, {session?.user?.name}</p>
-        <BanksList banks={banks} />
+        <div>
+          <h1 className='text-2xl pb-8 font-bold'>Banks</h1>
+          <div className='flex flex-col items-start'>
+            {banks.map(bank => (
+              <form action={handleBankClick} key={bank.id}>
+                <input
+                  name='institutionId'
+                  className='hidden'
+                  value={bank.id}
+                  readOnly
+                />
+                <button
+                  className='text-left mb-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700'
+                  type='submit'
+                >
+                  {bank.name}
+                </button>
+              </form>
+            ))}
+          </div>
+        </div>
       </ProtectedLayout>
     </Suspense>
   );

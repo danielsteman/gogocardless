@@ -1,38 +1,55 @@
-'use client';
+import { getToken } from '../utils/getToken';
+import { getServerSession } from 'next-auth';
+import authOptions from '../auth';
+import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
-import { useEffect, useState } from 'react';
+async function fetchAccounts(email: string, ref: string) {
+  const token = getToken(email);
+  const response = await fetch(
+    `http://localhost:3333/api/user/accounts?agreementRef=${ref}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Error fetching accounts: ${response.status} - ${errorText}`,
+    );
+  }
+  return response.json();
+}
 
-const Account = () => {
-  const [agreementRef, setAgreementRef] = useState<string | null>(null);
-  const [data, setData] = useState<any>(null);
+export default async function Page() {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    redirect('/login');
+  }
 
-  useEffect(() => {
-    const ref = localStorage.getItem('agreementRef');
-    setAgreementRef(ref);
+  const refCookie = cookies().get('agreementRef');
+  if (!refCookie) {
+    console.error('Agreement reference not found in URL');
+  }
 
-    if (ref) {
-      fetch(`http://localhost:3333/api/user/accounts?agreementRef=${ref}`)
-        .then(response => response.json())
-        .then(data => {
-          setData(data);
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error);
-        });
-    }
-  }, []);
+  const ref = refCookie!.value;
 
-  if (!agreementRef) {
-    return <div>Loading...</div>;
+  let accounts = [];
+
+  try {
+    accounts = await fetchAccounts(session.user?.email!, ref);
+  } catch (error) {
+    console.error('Error fetching banks:', error);
   }
 
   return (
     <div>
       <h1 className='text-2xl pb-8 font-bold'>Callback Page</h1>
-      <div>Agreement reference: {agreementRef}</div>
-      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+      <div>Agreement reference: {ref}</div>
+      {accounts && <pre>{JSON.stringify(accounts, null, 2)}</pre>}
     </div>
   );
-};
-
-export default Account;
+}
