@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
 async function fetchAccounts(email: string, ref: string) {
-  const token = getToken(email);
+  const token = await getToken(email);
   const response = await fetch(
     `http://localhost:3333/api/user/accounts?agreementRef=${ref}`,
     {

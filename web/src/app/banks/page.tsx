@@ -5,6 +5,7 @@ import authOptions from '../auth';
 import ProtectedLayout from '../layouts/ProtectedLayout';
 import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
+import { getToken } from '../utils/getToken';
 
 interface Bank {
   id: string;
@@ -16,9 +17,7 @@ interface Bank {
 }
 
 async function fetchBanks(email: string): Promise<Bank[]> {
-  const token = jwt.sign({ email }, process.env.NEXTAUTH_SECRET!, {
-    expiresIn: '1h',
-  });
+  const token = await getToken(email);
   const response = await fetch('http://localhost:3333/api/banks/list', {
     headers: {
       'Content-Type': 'application/json',
@@ -47,9 +46,7 @@ async function fetchRedirectLink(
   email: string,
   institutionId: string,
 ): Promise<Requisition> {
-  const token = jwt.sign({ email }, process.env.NEXTAUTH_SECRET!, {
-    expiresIn: '1h',
-  });
+  const token = await getToken(email);
   const response = await fetch(
     `http://localhost:3333/api/user/redirect?institutionId=${institutionId}`,
     {
