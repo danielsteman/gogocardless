@@ -32,6 +32,42 @@ async function fetchBanks(email: string): Promise<Bank[]> {
   return response.json();
 }
 
+interface Requisition {
+  id: string;
+  redirect: string;
+  status: string;
+  agreement: string;
+  accounts: string[];
+  reference: string;
+  userLanguage: string;
+  link: string;
+}
+
+async function fetchRedirectLink(
+  email: string,
+  institutionId: string,
+): Promise<Requisition> {
+  const token = jwt.sign({ email }, process.env.NEXTAUTH_SECRET!, {
+    expiresIn: '1h',
+  });
+  const response = await fetch(
+    `http://localhost:3333/api/user/redirect?institutionId=${institutionId}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Error fetching redirect link: ${response.status} - ${errorText}`,
+    );
+  }
+  return response.json();
+}
+
 export default async function Page() {
   const session = await getServerSession(authOptions);
 
@@ -39,10 +75,11 @@ export default async function Page() {
     redirect('/login');
   }
 
+  const email = session.user?.email!;
   let banks: Bank[] = [];
 
   try {
-    banks = await fetchBanks(session.user?.email!);
+    banks = await fetchBanks(email);
   } catch (error) {
     console.error('Error fetching banks:', error);
   }
@@ -50,29 +87,25 @@ export default async function Page() {
   const handleBankClick = async (data: FormData) => {
     'use server';
 
-    console.log(data);
-    const institutionId = data.get('institutionId');
+    const institutionId = data.get('institutionId') as string;
+    let redirectPath: string | null = null;
 
     try {
-      const response = await fetch('http://localhost:3000/api/redirect', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          institutionId: institutionId,
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
+      const data = await fetchRedirectLink(email, institutionId);
+      if (data) {
         cookies().set('agreementRef', data.id);
-        window.location.href = data.link;
+        redirectPath = data.link;
       } else {
-        console.error('Response error:', data.error);
+        redirectPath = '/';
+        console.error('Failed to get redirect link');
       }
     } catch (error) {
-      console.error('Error:', error);
+      redirectPath = '/';
+      console.error('Error while getting redirect link:', error);
+    } finally {
+      if (redirectPath) {
+        redirect(redirectPath);
+      }
     }
   };
 
