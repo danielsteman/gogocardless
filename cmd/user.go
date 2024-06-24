@@ -49,7 +49,9 @@ func userAccountsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountInfo, err := gocardless.GetEndUserAccountInfo(agreementRef)
+	user := auth.GetUserFromContext(r)
+
+	accountInfo, err := gocardless.GetEndUserAccountInfo(agreementRef, user.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

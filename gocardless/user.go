@@ -72,7 +72,7 @@ type AccountInfo struct {
 	gorm.Model
 	ID         string         `gorm:"type:uuid;primaryKey" json:"id"`
 	Status     string         `gorm:"type:varchar(255)" json:"status"`
-	Agreements pq.StringArray `gorm:"type:text[]" json:"agreements"`
+	Agreements string         `gorm:"type:varchar(255)" json:"agreements"`
 	Accounts   pq.StringArray `gorm:"type:text[]" json:"accounts"`
 	Reference  string         `gorm:"type:varchar(255)" json:"reference"`
 }
@@ -251,7 +251,23 @@ func DBGetRequisition(value string, searchBy string) (DBRequisition, error) {
 	return requisition, nil
 }
 
-func GetEndUserAccountInfo(agreementID string) (AccountInfo, error) {
+func DBGetAccountInfo(agreementID string) (AccountInfo, error) {
+	db, err := db.GetDB()
+	if err != nil {
+		return AccountInfo{}, fmt.Errorf("error connecting to the database: %w", err)
+	}
+
+	var accountInfo AccountInfo
+
+	result := db.Where("agreements = ?", agreementID).First(&accountInfo)
+	if result.Error != nil {
+		return AccountInfo{}, fmt.Errorf("error retrieving account information: %w", result.Error)
+	}
+
+	return accountInfo, nil
+}
+
+func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
 
 	req, err := http.NewRequest("GET", url, nil)
