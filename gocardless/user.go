@@ -69,11 +69,12 @@ func (DBRequisition) TableName() string {
 }
 
 type AccountInfo struct {
-	ID         string   `json:"id"`
-	Status     string   `json:"status"`
-	Agreements string   `json:"agreements"`
-	Accounts   []string `json:"accounts"`
-	Reference  string   `json:"reference"`
+	gorm.Model
+	ID         string         `gorm:"type:uuid;primaryKey" json:"id"`
+	Status     string         `gorm:"type:varchar(255)" json:"status"`
+	Agreements pq.StringArray `gorm:"type:text[]" json:"agreements"`
+	Accounts   pq.StringArray `gorm:"type:text[]" json:"accounts"`
+	Reference  string         `gorm:"type:varchar(255)" json:"reference"`
 }
 
 func GetEndUserAgreement(institutionID string) (UserAgreement, error) {

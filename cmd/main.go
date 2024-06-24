@@ -23,6 +23,7 @@ func main() {
 	err = db.AutoMigrate(
 		&gocardless.Token{},
 		&gocardless.DBRequisition{},
+		&gocardless.AccountInfo{},
 	)
 	if err != nil {
 		panic("failed to migrate database")
