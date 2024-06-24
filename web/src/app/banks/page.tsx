@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth/next';
 import authOptions from '../auth';
 import ProtectedLayout from '../layouts/ProtectedLayout';
-import jwt from 'jsonwebtoken';
 import { cookies } from 'next/headers';
 import { getToken } from '../utils/getToken';
 
