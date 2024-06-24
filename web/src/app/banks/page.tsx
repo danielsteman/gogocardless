@@ -50,10 +50,11 @@ export default async function Page() {
   const handleBankClick = async (data: FormData) => {
     'use server';
 
+    console.log(data);
     const institutionId = data.get('institutionId');
 
     try {
-      const response = await fetch('/api/redirect', {
+      const response = await fetch('http://localhost:3000/api/redirect', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
