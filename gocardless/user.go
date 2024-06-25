@@ -267,6 +267,11 @@ func DBGetAccountInfo(agreementID string) (AccountInfo, error) {
 	return accountInfo, nil
 }
 
+func GetActiveAgreements(email string) {
+	// get agreements from `requisitions` that have status `LN`
+	// that can be used to pull the latest data for a user
+}
+
 func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
 
