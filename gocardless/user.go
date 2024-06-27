@@ -318,6 +318,37 @@ func DBGetAccountInfo(agreementID string) (AccountInfo, error) {
 // 	}
 // }
 
+func DBPutRequisition(agreementID string, field string, value any) (Requisition, error) {
+	db, err := db.GetDB()
+	if err != nil {
+		return Requisition{}, fmt.Errorf("error connecting to the database: %w", err)
+	}
+
+	var requisition Requisition
+
+	result := db.Where("agreements = ?", agreementID).First(&requisition)
+	if result.Error != nil {
+		return Requisition{}, fmt.Errorf("error retrieving account information: %w", result.Error)
+	}
+
+	updateData := map[string]interface{}{
+		field: value,
+	}
+
+	result = db.Model(&requisition).Updates(updateData)
+	if result.Error != nil {
+		return Requisition{}, fmt.Errorf("error updating account information: %w", result.Error)
+	}
+
+	// Retrieve the updated account information
+	result = db.Where("agreements = ?", agreementID).First(&requisition)
+	if result.Error != nil {
+		return Requisition{}, fmt.Errorf("error retrieving updated account information: %w", result.Error)
+	}
+
+	return requisition, nil
+}
+
 func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
 

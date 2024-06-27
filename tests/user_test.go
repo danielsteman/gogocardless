@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/danielsteman/gogocardless/gocardless"
+	"github.com/google/uuid"
 )
 
 func TestGetEndUserAgreement(t *testing.T) {
@@ -47,4 +48,23 @@ func TestGetEndUserAccountInfo(t *testing.T) {
 	if len(accountInfo.Accounts) == 0 {
 		log.Fatalf("Did not get the expected number of accounts: %v", err)
 	}
+}
+
+func TestPutAccountInfo(t *testing.T) {
+	requisition := gocardless.DBRequisition{
+		ID:           uuid.New().String(),
+		Redirect:     "test",
+		Status:       "test",
+		Agreement:    "test",
+		Accounts:     []string{"test1", "test2"},
+		Reference:    "test",
+		UserLanguage: "test",
+		Link:         "test",
+		Email:        "",
+	}
+	_, err := gocardless.DBCreateRequisition(requisition)
+	if err != nil {
+		log.Fatalf("Failed to create requisition: %v", err)
+	}
+
 }
