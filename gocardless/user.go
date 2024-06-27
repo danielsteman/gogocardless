@@ -114,8 +114,8 @@ type PendingTransaction struct {
 
 type Transactions struct {
 	ID        uint                 `gorm:"primaryKey"`
-	Booked    []BookedTransaction  `json:"booked"`
-	Pending   []PendingTransaction `json:"pending"`
+	Booked    []BookedTransaction  `json:"booked" gorm:"foreignKey:AccountInfoID;references:ID"`
+	Pending   []PendingTransaction `json:"pending" gorm:"foreignKey:AccountInfoID;references:ID"`
 	AccountID string               `json:"-"` // Foreign key for AccountInfo
 }
 
