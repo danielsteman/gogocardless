@@ -66,5 +66,8 @@ func TestPutAccountInfo(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Failed to create requisition: %v", err)
 	}
-
+	err := gocardless.DBPutRequisition(requisition.Agreement, "Status", "LN")
+	if err != nil {
+		log.Fatalf("Failed to update requisition: %v", err)
+	}
 }
