@@ -77,6 +77,48 @@ type AccountInfo struct {
 	Reference  string         `gorm:"type:varchar(255)" json:"reference"`
 }
 
+type Account struct {
+	ID   uint   `gorm:"primaryKey"`
+	Iban string `json:"iban"`
+}
+
+type TransactionAmount struct {
+	ID       uint   `gorm:"primaryKey"`
+	Currency string `json:"currency"`
+	Amount   string `json:"amount"`
+}
+
+type BookedTransaction struct {
+	ID                                uint              `gorm:"primaryKey"`
+	TransactionId                     string            `json:"transactionId"`
+	DebtorName                        string            `json:"debtorName,omitempty"`
+	DebtorAccountID                   uint              `json:"-"`
+	DebtorAccount                     *Account          `json:"debtorAccount,omitempty"`
+	TransactionAmountID               uint              `json:"-"`
+	TransactionAmount                 TransactionAmount `json:"transactionAmount"`
+	BookingDate                       string            `json:"bookingDate"`
+	ValueDate                         string            `json:"valueDate"`
+	RemittanceInformationUnstructured string            `json:"remittanceInformationUnstructured"`
+	BankTransactionCode               string            `json:"bankTransactionCode,omitempty"`
+	AccountInfoID                     string            `json:"-"` // Foreign key for AccountInfo
+}
+
+type PendingTransaction struct {
+	ID                                uint              `gorm:"primaryKey"`
+	TransactionAmountID               uint              `json:"-"`
+	TransactionAmount                 TransactionAmount `json:"transactionAmount"`
+	ValueDate                         string            `json:"valueDate"`
+	RemittanceInformationUnstructured string            `json:"remittanceInformationUnstructured"`
+	AccountInfoID                     string            `json:"-"` // Foreign key for AccountInfo
+}
+
+type Transactions struct {
+	ID        uint                 `gorm:"primaryKey"`
+	Booked    []BookedTransaction  `json:"booked"`
+	Pending   []PendingTransaction `json:"pending"`
+	AccountID string               `json:"-"` // Foreign key for AccountInfo
+}
+
 func GetEndUserAgreement(institutionID string) (UserAgreement, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/agreements/enduser/"
 
@@ -267,10 +309,14 @@ func DBGetAccountInfo(agreementID string) (AccountInfo, error) {
 	return accountInfo, nil
 }
 
-func GetActiveAgreements(email string) {
-	// get agreements from `requisitions` that have status `LN`
-	// that can be used to pull the latest data for a user
-}
+// func GetEndUserTransactions(email string) (Transactions, error) {
+// 	// get agreements from `requisitions` that have status `LN`
+// 	// that can be used to pull the latest data for a user
+// 	db, err := db.GetDB()
+// 	if err != nil {
+// 		return Transactions{}, fmt.Errorf("error connecting to the database: %w", err)
+// 	}
+// }
 
 func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error) {
 	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID

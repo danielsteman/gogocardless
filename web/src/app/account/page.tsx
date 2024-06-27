@@ -24,6 +24,8 @@ async function fetchAccounts(email: string, ref: string) {
   return response.json();
 }
 
+async function fetchTransactions(email: string, accountId: string) {}
+
 export default async function Page() {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -47,7 +49,7 @@ export default async function Page() {
 
   return (
     <div>
-      <h1 className='text-2xl pb-8 font-bold'>Callback Page</h1>
+      <h1 className='text-2xl pb-8 font-bold'>Accounts overview</h1>
       <div>Agreement reference: {ref}</div>
       {accounts && <pre>{JSON.stringify(accounts, null, 2)}</pre>}
     </div>

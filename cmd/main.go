@@ -24,6 +24,11 @@ func main() {
 		&gocardless.Token{},
 		&gocardless.DBRequisition{},
 		&gocardless.AccountInfo{},
+		&gocardless.Account{},
+		&gocardless.TransactionAmount{},
+		&gocardless.BookedTransaction{},
+		&gocardless.PendingTransaction{},
+		&gocardless.Transactions{},
 	)
 	if err != nil {
 		panic("failed to migrate database")
