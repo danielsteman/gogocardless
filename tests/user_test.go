@@ -4,8 +4,10 @@ import (
 	"log"
 	"testing"
 
+	"github.com/danielsteman/gogocardless/db"
 	"github.com/danielsteman/gogocardless/gocardless"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetEndUserAgreement(t *testing.T) {
@@ -64,10 +66,28 @@ func TestPutAccountInfo(t *testing.T) {
 	}
 	_, err := gocardless.DBCreateRequisition(requisition)
 	if err != nil {
-		log.Fatalf("Failed to create requisition: %v", err)
+		t.Fatalf("Failed to create requisition: %v", err)
 	}
-	err := gocardless.DBPutRequisition(requisition.Agreement, "Status", "LN")
+
+	// Perform the update
+	err = gocardless.DBPutRequisition(requisition.Agreement, "Status", "LN")
 	if err != nil {
-		log.Fatalf("Failed to update requisition: %v", err)
+		t.Fatalf("Failed to update requisition: %v", err)
 	}
+
+	// Verify the update
+	db, err := db.GetDB()
+	if err != nil {
+		t.Fatalf("Failed to connect to the database: %v", err)
+	}
+
+	var updatedRequisition gocardless.DBRequisition
+	result := db.Where("agreement = ?", requisition.Agreement).First(&updatedRequisition)
+	if result.Error != nil {
+		t.Fatalf("Failed to retrieve updated requisition: %v", result.Error)
+	}
+
+	assert.Equal(t, "LN", updatedRequisition.Status, "The Status field should be updated to 'LN'")
+
+	db.Delete(&updatedRequisition)
 }
