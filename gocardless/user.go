@@ -326,7 +326,7 @@ func DBPutRequisition(agreementID string, field string, value any) error {
 
 	var requisition Requisition
 
-	result := db.Where("agreements = ?", agreementID).First(&requisition)
+	result := db.Where("agreement = ?", agreementID).First(&requisition)
 	if result.Error != nil {
 		return fmt.Errorf("error retrieving account information: %w", result.Error)
 	}
@@ -341,7 +341,7 @@ func DBPutRequisition(agreementID string, field string, value any) error {
 	}
 
 	// Retrieve the updated account information
-	result = db.Where("agreements = ?", agreementID).First(&requisition)
+	result = db.Where("agreement = ?", agreementID).First(&requisition)
 	if result.Error != nil {
 		return fmt.Errorf("error retrieving updated account information: %w", result.Error)
 	}

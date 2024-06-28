@@ -55,13 +55,13 @@ func TestGetEndUserAccountInfo(t *testing.T) {
 func TestPutAccountInfo(t *testing.T) {
 	requisition := gocardless.DBRequisition{
 		ID:           uuid.New().String(),
-		Redirect:     "test",
-		Status:       "test",
-		Agreement:    "test",
+		Redirect:     "test1234",
+		Status:       "test1234",
+		Agreement:    "test1234",
 		Accounts:     []string{"test1", "test2"},
-		Reference:    "test",
-		UserLanguage: "test",
-		Link:         "test",
+		Reference:    "test1234",
+		UserLanguage: "test1234",
+		Link:         "test1234",
 		Email:        "",
 	}
 	_, err := gocardless.DBCreateRequisition(requisition)
