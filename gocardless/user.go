@@ -309,6 +309,20 @@ func DBGetAccountInfo(agreementID string) (AccountInfo, error) {
 	return accountInfo, nil
 }
 
+func DBCreateAccountInfo(accountInfo AccountInfo) (string, error) {
+	db, err := db.GetDB()
+	if err != nil {
+		return "", fmt.Errorf("error connecting to the database: %w", err)
+	}
+
+	result := db.Create(&accountInfo)
+	if result.Error != nil {
+		return "", fmt.Errorf("error creating account information: %w", result.Error)
+	}
+
+	return "Requisition created successfully", nil
+}
+
 // func GetEndUserTransactions(email string) (Transactions, error) {
 // 	// get agreements from `requisitions` that have status `LN`
 // 	// that can be used to pull the latest data for a user
@@ -385,6 +399,10 @@ func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error
 	err = json.Unmarshal(jsonData, &accountInfo)
 	if err != nil {
 		return AccountInfo{}, fmt.Errorf("failed to unmarshal account info: %w", err)
+	}
+
+	if _, err := DBCreateAccountInfo(accountInfo); err != nil {
+		return AccountInfo{}, fmt.Errorf("error saving new account info: %w", err)
 	}
 
 	return accountInfo, nil
