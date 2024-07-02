@@ -1,5 +1,5 @@
 'use client';
-
+import { useScreenSize } from '@visx/responsive';
 import React from 'react';
 import { AreaStack } from '@vx/shape';
 import { SeriesPoint } from '@vx/shape/lib/types';
@@ -86,5 +86,6 @@ const StackedAreas = ({
 };
 
 export default function Page() {
-  <StackedAreas width={400} height={400} />;
+  const { width, height } = useScreenSize({ debounceTime: 150 });
+  return <StackedAreas width={width} height={height} />;
 }
