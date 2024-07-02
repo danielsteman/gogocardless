@@ -9,6 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@visx/visx": "^3.11.0",
+    "@vx/gradient": "^0.0.199",
+    "@vx/mock-data": "^0.0.199",
+    "@vx/responsive": "^0.0.199",
+    "@vx/scale": "^0.0.199",
+    "@vx/shape": "^0.0.199",
     "jsonwebtoken": "^9.0.2",
     "next": "14.2.3",
     "react": "^18",
