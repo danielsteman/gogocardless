@@ -13,6 +13,19 @@ import { timeParse } from 'd3-time-format';
 type BrowserNames = keyof BrowserUsage;
 
 const data = browserUsage;
+
+// {
+//   Firefox: '18.82',
+//   'Google Chrome': '48.09',
+//   'Internet Explorer': '24.14',
+//   'Microsoft Edge': '0.03',
+//   Mozilla: '0.12',
+//   Opera: '1.32',
+//   'Other/Unknown': '0.01',
+//   Safari: '7.46',
+//   date: '2015 Jun 15',
+// };
+
 const keys = Object.keys(data[0]).filter(k => k !== 'date') as BrowserNames[];
 const parseDate = timeParse('%Y %b %d');
 export const background = '#f38181';
