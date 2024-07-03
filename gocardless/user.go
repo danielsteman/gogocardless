@@ -303,6 +303,9 @@ func DBGetAccountInfo(agreementID string) (AccountInfo, error) {
 
 	result := db.Where("agreements = ?", agreementID).First(&accountInfo)
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return AccountInfo{}, nil
+		}
 		return AccountInfo{}, fmt.Errorf("error retrieving account information: %w", result.Error)
 	}
 
@@ -322,15 +325,6 @@ func DBCreateAccountInfo(accountInfo AccountInfo) (string, error) {
 
 	return "Requisition created successfully", nil
 }
-
-// func GetEndUserTransactions(email string) (Transactions, error) {
-// 	// get agreements from `requisitions` that have status `LN`
-// 	// that can be used to pull the latest data for a user
-// 	db, err := db.GetDB()
-// 	if err != nil {
-// 		return Transactions{}, fmt.Errorf("error connecting to the database: %w", err)
-// 	}
-// }
 
 func DBPutRequisition(agreementID string, field string, value any) error {
 	db, err := db.GetDB()
@@ -363,6 +357,15 @@ func DBPutRequisition(agreementID string, field string, value any) error {
 }
 
 func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error) {
+	accountInfo, err := DBGetAccountInfo(agreementID)
+	if err != nil {
+		return AccountInfo{}, err
+	}
+
+	if accountInfo.Status == "LN" {
+		return accountInfo, nil
+	}
+
 	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -395,7 +398,6 @@ func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error
 		return AccountInfo{}, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var accountInfo AccountInfo
 	err = json.Unmarshal(jsonData, &accountInfo)
 	if err != nil {
 		return AccountInfo{}, fmt.Errorf("failed to unmarshal account info: %w", err)
@@ -407,3 +409,12 @@ func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error
 
 	return accountInfo, nil
 }
+
+// func GetEndUserTransactions(email string) (Transactions, error) {
+// 	// get agreements from `requisitions` that have status `LN`
+// 	// that can be used to pull the latest data for a user
+// 	db, err := db.GetDB()
+// 	if err != nil {
+// 		return Transactions{}, fmt.Errorf("error connecting to the database: %w", err)
+// 	}
+// }
