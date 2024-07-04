@@ -11,7 +11,7 @@ Ripped [these](https://www.arhea.net/posts/2023-08-24-golang-vscode-configuratio
 Run a local Postgres instance:
 
 ```bash
-docker run -d \          
+docker run -d \
     --name gogocardless-postgres \
     -e POSTGRES_DB=gogocardless \
     -e POSTGRES_USER=admin \
