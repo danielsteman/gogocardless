@@ -25,8 +25,6 @@ async function fetchAccounts(email: string, ref: string): Promise<string[]> {
   return data.accounts;
 }
 
-async function fetchTransactions(email: string, accountId: string) {}
-
 export default async function Page() {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -53,8 +51,8 @@ export default async function Page() {
       <h1 className='text-2xl pb-8 font-bold'>Accounts overview</h1>
       <div>Agreement reference from cookies: {ref}</div>
       <h2 className='text-2xl pb-8 font-bold'>Accounts</h2>
-      {accounts.map((account, index) => (
-        <div key={index}>{account}</div>
+      {accounts.map((accountId, index) => (
+        <div key={index}>{accountId}</div>
       ))}
     </div>
   );
