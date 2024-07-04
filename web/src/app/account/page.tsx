@@ -4,7 +4,7 @@ import authOptions from '../auth';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
-async function fetchAccounts(email: string, ref: string) {
+async function fetchAccounts(email: string, ref: string): Promise<string[]> {
   const token = await getToken(email);
   const response = await fetch(
     `http://localhost:3333/api/user/accounts?agreementRef=${ref}`,
@@ -21,7 +21,8 @@ async function fetchAccounts(email: string, ref: string) {
       `Error fetching accounts: ${response.status} - ${errorText}`,
     );
   }
-  return response.json();
+  const data = await response.json();
+  return data.accounts;
 }
 
 async function fetchTransactions(email: string, accountId: string) {}
@@ -39,7 +40,7 @@ export default async function Page() {
 
   const ref = refCookie!.value;
 
-  let accounts = [];
+  let accounts: string[] = [];
 
   try {
     accounts = await fetchAccounts(session.user?.email!, ref);
