@@ -397,11 +397,89 @@ func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error
 	return accountInfo, nil
 }
 
-// func GetEndUserTransactions(email string) (Transactions, error) {
-// 	// get agreements from `requisitions` that have status `LN`
-// 	// that can be used to pull the latest data for a user
-// 	db, err := db.GetDB()
-// 	if err != nil {
-// 		return Transactions{}, fmt.Errorf("error connecting to the database: %w", err)
-// 	}
-// }
+func GetEndUserTransactions(accountId string, email string) (Transactions, error) {
+	// get agreements from `requisitions` that have status `LN`
+	// that can be used to pull the latest data for a user
+	url := fmt.Sprintf("https://bankaccountdata.gocardless.com/api/v2/accounts/%s/transactions/", accountId)
+
+	db, err := db.GetDB()
+	if err != nil {
+		return Transactions{}, fmt.Errorf("error connecting to the database: %w", err)
+	}
+	// Create the HTTP request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return Transactions{}, fmt.Errorf("error creating request: %w", err)
+	}
+
+	// Get or refresh the token
+	token, err := GetOrRefreshToken()
+	if err != nil {
+		return Transactions{}, fmt.Errorf("failed to get token: %w", err)
+	}
+
+	// Set headers
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token.Access)
+
+	// Create an HTTP client and make the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return Transactions{}, fmt.Errorf("failed to get transactions: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check the response status
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return Transactions{}, fmt.Errorf("failed to get transactions: status code %d, response: %s", resp.StatusCode, string(body))
+	}
+	jsonData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return Transactions{}, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Unmarshal the response into the Transactions struct
+	var transactions Transactions
+	err = json.Unmarshal(jsonData, &transactions)
+	if err != nil {
+		return Transactions{}, fmt.Errorf("failed to unmarshal transactions: %w", err)
+	}
+
+	transactions.AccountID = accountId
+
+	err = db.Transaction(func(tx *gorm.DB) error {
+		// Delete existing transactions for the account
+		if err := tx.Where("account_id = ?", accountId).Delete(&BookedTransaction{}).Error; err != nil {
+			return fmt.Errorf("failed to delete existing booked transactions: %w", err)
+		}
+		if err := tx.Where("account_id = ?", accountId).Delete(&PendingTransaction{}).Error; err != nil {
+			return fmt.Errorf("failed to delete existing pending transactions: %w", err)
+		}
+
+		// Create new booked transactions
+		for _, booked := range transactions.Booked {
+			booked.AccountInfoID = accountId
+			if err := tx.Create(&booked).Error; err != nil {
+				return fmt.Errorf("failed to create booked transaction: %w", err)
+			}
+		}
+
+		// Create new pending transactions
+		for _, pending := range transactions.Pending {
+			pending.AccountInfoID = accountId
+			if err := tx.Create(&pending).Error; err != nil {
+				return fmt.Errorf("failed to create pending transaction: %w", err)
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return Transactions{}, fmt.Errorf("failed to store transactions in database: %w", err)
+	}
+
+	return transactions, nil
+}
