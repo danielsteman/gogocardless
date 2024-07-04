@@ -58,3 +58,6 @@ go test ./...
 
 1. How many people are affected by the problem of not being able to pay their subscriptions?
 
+## Connections
+
+[mastercard](https://developer.mastercard.com/open-banking-europe/documentation/unlicensed/aiia-data/)
