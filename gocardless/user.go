@@ -301,7 +301,7 @@ func DBGetAccountInfo(agreementID string) (AccountInfo, error) {
 
 	var accountInfo AccountInfo
 
-	result := db.Where("agreements = ?", agreementID).First(&accountInfo)
+	result := db.Where("id = ?", agreementID).First(&accountInfo)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return AccountInfo{}, nil
@@ -318,42 +318,24 @@ func DBCreateAccountInfo(accountInfo AccountInfo) (string, error) {
 		return "", fmt.Errorf("error connecting to the database: %w", err)
 	}
 
-	result := db.Create(&accountInfo)
+	// Check if the account info with the given ID already exists
+	var existingAccountInfo AccountInfo
+	result := db.Where("id = ?", accountInfo.ID).First(&existingAccountInfo)
+	if result.Error == nil {
+		// Record with the same ID already exists
+		return "", fmt.Errorf("account info with ID %s already exists", accountInfo.ID)
+	} else if result.Error != gorm.ErrRecordNotFound {
+		// An error occurred while querying the database
+		return "", fmt.Errorf("error checking for existing account info: %w", result.Error)
+	}
+
+	// Create the new account info record
+	result = db.Create(&accountInfo)
 	if result.Error != nil {
 		return "", fmt.Errorf("error creating account information: %w", result.Error)
 	}
 
-	return "Requisition created successfully", nil
-}
-
-func DBPutRequisition(agreementID string, field string, value any) error {
-	db, err := db.GetDB()
-	if err != nil {
-		return fmt.Errorf("error connecting to the database: %w", err)
-	}
-
-	var requisition Requisition
-
-	result := db.Where("agreement = ?", agreementID).First(&requisition)
-	if result.Error != nil {
-		return fmt.Errorf("error retrieving account information: %w", result.Error)
-	}
-
-	updateData := map[string]interface{}{
-		field: value,
-	}
-
-	result = db.Model(&requisition).Updates(updateData)
-	if result.Error != nil {
-		return fmt.Errorf("error updating account information: %w", result.Error)
-	}
-
-	// Retrieve the updated account information
-	result = db.Where("agreement = ?", agreementID).First(&requisition)
-	if result.Error != nil {
-		return fmt.Errorf("error retrieving updated account information: %w", result.Error)
-	}
-	return nil
+	return "Account info created successfully", nil
 }
 
 func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error) {
@@ -362,49 +344,54 @@ func GetEndUserAccountInfo(agreementID string, email string) (AccountInfo, error
 		return AccountInfo{}, err
 	}
 
+	// Check if accountInfo already exists and its status is not "LN"
 	if accountInfo.Status == "LN" {
 		return accountInfo, nil
 	}
 
-	url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
+	// If accountInfo is empty, proceed to fetch and create it
+	if accountInfo.Agreements == "" {
+		url := "https://bankaccountdata.gocardless.com/api/v2/requisitions/" + agreementID
 
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return AccountInfo{}, fmt.Errorf("error creating request: %w", err)
-	}
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return AccountInfo{}, fmt.Errorf("error creating request: %w", err)
+		}
 
-	token, err := GetOrRefreshToken()
-	if err != nil {
-		return AccountInfo{}, fmt.Errorf("failed to get token: %w", err)
-	}
+		token, err := GetOrRefreshToken()
+		if err != nil {
+			return AccountInfo{}, fmt.Errorf("failed to get token: %w", err)
+		}
 
-	req.Header.Set("accept", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token.Access)
+		req.Header.Set("accept", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token.Access)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return AccountInfo{}, fmt.Errorf("failed to get account info: %w", err)
-	}
-	defer resp.Body.Close()
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			return AccountInfo{}, fmt.Errorf("failed to get account info: %w", err)
+		}
+		defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return AccountInfo{}, fmt.Errorf("failed to get account info: status code %d, response: %s", resp.StatusCode, string(body))
-	}
+		if resp.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(resp.Body)
+			return AccountInfo{}, fmt.Errorf("failed to get account info: status code %d, response: %s", resp.StatusCode, string(body))
+		}
 
-	jsonData, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return AccountInfo{}, fmt.Errorf("failed to read response body: %w", err)
-	}
+		jsonData, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return AccountInfo{}, fmt.Errorf("failed to read response body: %w", err)
+		}
 
-	err = json.Unmarshal(jsonData, &accountInfo)
-	if err != nil {
-		return AccountInfo{}, fmt.Errorf("failed to unmarshal account info: %w", err)
-	}
+		err = json.Unmarshal(jsonData, &accountInfo)
+		if err != nil {
+			return AccountInfo{}, fmt.Errorf("failed to unmarshal account info: %w", err)
+		}
 
-	if _, err := DBCreateAccountInfo(accountInfo); err != nil {
-		return AccountInfo{}, fmt.Errorf("error saving new account info: %w", err)
+		_, err = DBCreateAccountInfo(accountInfo)
+		if err != nil {
+			return AccountInfo{}, fmt.Errorf("error saving new account info: %w", err)
+		}
 	}
 
 	return accountInfo, nil

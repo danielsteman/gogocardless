@@ -50,7 +50,7 @@ export default async function Page() {
   return (
     <div>
       <h1 className='text-2xl pb-8 font-bold'>Accounts overview</h1>
-      <div>Agreement reference: {ref}</div>
+      <div>Agreement reference from cookies: {ref}</div>
       {accounts && <pre>{JSON.stringify(accounts, null, 2)}</pre>}
     </div>
   );
