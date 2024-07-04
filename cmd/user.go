@@ -15,7 +15,7 @@ func (rs userResource) Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/redirect", userRedirectHandler)
 	r.Get("/accounts", userAccountsHandler)
-
+	r.Get("/accounts/{id}", userAccountTransactionsHandler)
 	return r
 }
 
@@ -59,6 +59,29 @@ func userAccountsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(accountInfo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func userAccountTransactionsHandler(w http.ResponseWriter, r *http.Request) {
+	accountId := chi.URLParam(r, "id")
+	if accountId == "" {
+		http.Error(w, "accountId path parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	user := auth.GetUserFromContext(r)
+
+	transactions, err := gocardless.GetEndUserTransactions(accountId, user.Email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(transactions)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
