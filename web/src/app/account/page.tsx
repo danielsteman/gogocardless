@@ -52,7 +52,10 @@ export default async function Page() {
     <div>
       <h1 className='text-2xl pb-8 font-bold'>Accounts overview</h1>
       <div>Agreement reference from cookies: {ref}</div>
-      {accounts && <pre>{JSON.stringify(accounts, null, 2)}</pre>}
+      <h2 className='text-2xl pb-8 font-bold'>Accounts</h2>
+      {accounts.map((account, index) => (
+        <div key={index}>{account}</div>
+      ))}
     </div>
   );
 }
